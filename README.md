@@ -8,13 +8,21 @@
 
 1.  Clona el repositorio:
     ```bash
+    cd /tmp/
+    rm -rf docker-dev-env
     git clone https://github.com/nunezlagos/docker-dev-env.git
-    cd docker-dev-env
+    cd docker-dev-env/scripts/
     ```
 
 2.  Ejecuta el script de instalación:
     ```bash
-    bash setup.sh
+    chmod +x setup.sh
+    ./setup.sh
+    ```
+
+3.  Reinicia tu terminal o ejecuta:
+    ```bash
+    newgrp docker
     ```
 
 ### Uso Básico

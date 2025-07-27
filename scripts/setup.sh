@@ -76,20 +76,22 @@ install_packages_debian() {
   log "Actualizando repositorios..."
   retry sudo apt update || handle_error "falló apt update"
   log "Instalando paquetes base..."
-  retry sudo apt install -y curl git ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Falló la instalación de paquetes base"
+  retry sudo apt install -y curl git zip unzip ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Falló la instalación de paquetes base"
 }
 
 install_packages_arch() {
   log "Actualizando repositorios de Arch..."
   retry sudo pacman -Sy --noconfirm || handle_error "falló sincronización de pacman"
   log "Instalando paquetes base..."
-  retry sudo pacman -S --noconfirm curl git || handle_error "Falló la instalación de paquetes base"
+  retry sudo pacman -S --noconfirm curl git zip unzip || handle_error "Falló la instalación de paquetes base"
 }
 
 # Verificar e instalar dependencias
 missing_deps=()
 ! command -v curl >/dev/null && missing_deps+=("curl")
 ! command -v git >/dev/null && missing_deps+=("git")
+! command -v zip >/dev/null && missing_deps+=("zip")
+! command -v unzip >/dev/null && missing_deps+=("unzip")
 
 if [ ${#missing_deps[@]} -gt 0 ]; then
   log "Dependencias faltantes: ${missing_deps[*]}"
@@ -382,7 +384,18 @@ log "[9/10] Copiando archivos de configuración y scripts..."
 # Copiar scripts a la carpeta de desarrollo
 cp "$SCRIPT_DIR/up.sh" "$DEV_HOME/docker/up.sh"
 cp "$SCRIPT_DIR/project-manager.sh" "$DEV_HOME/docker/project-manager.sh"
+chmod +x "$DEV_HOME/docker/up.sh"
+chmod +x "$DEV_HOME/docker/project-manager.sh"
 log "✓ Scripts copiados correctamente"
+
+# Copiar archivos de configuración
+CONFIG_SRC_DIR="$SCRIPT_DIR/../config"
+if [ -d "$CONFIG_SRC_DIR" ]; then
+  cp -r "$CONFIG_SRC_DIR" "$DEV_HOME/docker/config"
+  log "✓ Archivos de configuración copiados correctamente"
+else
+  log "ADVERTENCIA: No se encontró la carpeta config en $CONFIG_SRC_DIR"
+fi
 
 # Copiar carpeta examples al entorno docker
 EXAMPLES_SRC_DIR="$SCRIPT_DIR/../examples"

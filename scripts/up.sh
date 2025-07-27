@@ -89,13 +89,13 @@ fi
 
 
 # Verificar que existan los archivos docker-compose
-if [ ! -f "traefik/docker-compose.yml" ]; then
-    echo "Error: traefik/docker-compose.yml no encontrado"
+if [ ! -f "config/traefik-compose.yml" ]; then
+    echo "Error: config/traefik-compose.yml no encontrado"
     exit 1
 fi
 
-if [ ! -f "stack/docker-compose.yml" ]; then
-    echo "Error: stack/docker-compose.yml no encontrado"
+if [ ! -f "config/stack-compose.yml" ]; then
+    echo "Error: config/stack-compose.yml no encontrado"
     exit 1
 fi
 
@@ -120,10 +120,10 @@ check_port 8025 # Mailhog Web
 check_port 8087 # Adminer
 
 echo "Iniciando proxy reverso Traefik..."
-docker-compose -f "$DEV_HOME/traefik/docker-compose.yml" up -d
+docker-compose -f "$DEV_HOME/config/traefik-compose.yml" up -d
 
 echo "Iniciando servicios de desarrollo..."
-docker-compose -f "$DEV_HOME/stack/docker-compose.yml" up -d
+docker-compose -f "$DEV_HOME/config/stack-compose.yml" up -d
 echo ""
 
 echo "Esperando que los servicios estén listos..."
