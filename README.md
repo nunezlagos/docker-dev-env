@@ -196,7 +196,7 @@ Una vez que hayas ejecutado `./up.sh`, podrás acceder a todos los servicios des
 | **Node.js** | http://localhost:3000 | 9229 | Entorno Node.js con Angular, Vue, React |
 | **Nginx** | http://localhost:8086 | - | Servidor web estático |
 
-### 🔗 Conexiones Directas a Bases de Datos
+### Conexiones Directas a Bases de Datos
 
 **MySQL:**
 ```bash
@@ -226,7 +226,7 @@ mongosh mongodb://localhost:27017
 redis-cli -h localhost -p 6379
 ```
 
-### 📋 Datos de Conexión para Bases de Datos
+### Datos de Conexión para Bases de Datos
 
 **Para MySQL (phpMyAdmin):**
 - Servidor: `mysql`
@@ -246,9 +246,9 @@ redis-cli -h localhost -p 6379
 - **MongoDB:** No compatible con Adminer (usar Mongo Express)
 - **Redis:** No compatible con Adminer (usar Redis Commander)
 
-### 💻 Cómo Usar los Servidores de Desarrollo
+### Cómo Usar los Servidores de Desarrollo
 
-### 📁 Organización de Proyectos
+### Organización de Proyectos
 Cada tecnología tiene 3 carpetas disponibles:
 - **General**: Para proyectos de prueba y aprendizaje
 - **Personal**: Para proyectos personales
@@ -377,7 +377,7 @@ docker-compose -f config/stack-compose.yml restart
 docker-compose -f config/stack-compose.yml --profile static up nginx
 ```
 
-### 📁 Gestión de Proyectos (Nuevo)
+### Gestión de Proyectos (Nuevo)
 ```bash
 # Usar el gestor de proyectos
 ./project-manager.sh help
@@ -397,7 +397,7 @@ docker-compose -f config/stack-compose.yml --profile static up nginx
 ./project-manager.sh info
 ```
 
-### 🔄 Reiniciar un Servicio Específico
+### Reiniciar un Servicio Específico
 ```bash
 # Reiniciar MySQL
 docker-compose -f stack-compose.yml restart mysql
@@ -409,7 +409,7 @@ docker-compose -f stack-compose.yml restart postgres
 docker-compose -f stack-compose.yml restart mongodb
 ```
 
-### 📊 Ver el Estado de los Servicios
+### Ver el Estado de los Servicios
 ```bash
 # Ver qué contenedores están corriendo
 docker ps
@@ -427,7 +427,7 @@ docker exec -it stack_php_1 bash
 docker exec -it stack_mysql_1 mysql -u devuser -p
 ```
 
-### 📝 Ver Logs (Para Solucionar Problemas)
+### Ver Logs (Para Solucionar Problemas)
 ```bash
 # Ver logs de todos los servicios
 docker-compose -f stack-compose.yml logs
@@ -439,7 +439,7 @@ docker-compose -f stack-compose.yml logs mysql
 docker-compose -f stack-compose.yml logs -f
 ```
 
-## ❗ Solución de Problemas Comunes
+## Solución de Problemas Comunes
 
 ### El entorno no inicia
 ```bash
