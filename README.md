@@ -6,51 +6,39 @@
 
 ### Instalación
 
-```bash
-# 1. Clona el repositorio y entra a la carpeta scripts
-cd /tmp/
-rm -rf docker-dev-env
-git clone https://github.com/nunezlagos/docker-dev-env.git
-cd docker-dev-env/scripts/
+1.  Clona el repositorio:
+    ```bash
+    git clone https://github.com/nunezlagos/docker-dev-env.git
+    cd docker-dev-env
+    ```
 
-# 2. Ejecuta el instalador
-chmod +x setup.sh
-./setup.sh
-
-# 3. Reinicia tu terminal o ejecuta:
-newgrp docker
-```
+2.  Ejecuta el script de instalación:
+    ```bash
+    bash setup.sh
+    ```
 
 ### Uso Básico
 
-```bash
-# Inicia todos los servicios
-./up.sh
+-   **Iniciar entorno:** `cd ~/dev/docker && ./up.sh`
+-   **Crear un proyecto:** `./project-manager.sh create php mi-proyecto`
+-   **Detener entorno:** `docker-compose down`
 
-# Crea un nuevo proyecto
-./project-manager.sh create php personal mi-proyecto
+### Organización de Proyectos
 
-# Accede a los servicios en tu navegador
-# Ejemplo: http://php.localhost, http://python.localhost, http://node.localhost
+-   `~/dev/docker/services`: Para configuraciones de servicios (Traefik, etc.).
+-   `~/dev/docker/projects`: Para tus proyectos PHP, Node, Python, etc.
+-   `~/dev/docker/html`: Para proyectos estáticos HTML/Nginx.
 
-# Detén el entorno
-./down.sh
-```
-
-### Estructura de Carpetas
+### Estructura de Carpetas Generada
 
 ```
 ~/dev/docker/
-├── services/      # Servicios Docker (traefik, stack, nginx, etc.)
-├── projects/      # Proyectos de desarrollo (PHP, Node.js, Python, etc.)
-├── html/          # Archivos estáticos HTML
-├── backups/       # Backups automáticos
-├── examples/      # Ejemplos y plantillas
+├── services/
+├── projects/
+└── html/
 ```
 
-### Más información
-
-Consulta `extrainfo.md` para detalles completos, troubleshooting, comandos avanzados y arquitectura.
+Para información más detallada, consulta [extrainfo.md](./docs/extrainfo.md).
 ```bash
 # Conectar desde terminal
 mongo mongodb://localhost:27017
@@ -87,16 +75,11 @@ redis-cli -h localhost -p 6379
 ### Cómo Usar los Servidores de Desarrollo
 
 ### Organización de Proyectos
-Cada tecnología tiene 3 carpetas disponibles:
-- **General**: Para proyectos de prueba y aprendizaje
-- **Personal**: Para proyectos personales
-- **Trabajo**: Para proyectos profesionales
-
-### PHP + Apache (Puerto 8085, Debug 9003)
-**Carpetas disponibles:**
-- `~/dev/docker/php-projects/` - Proyectos generales
-- `~/dev/docker/php-personal/` - Proyectos personales  
-- `~/dev/docker/php-work/` - Proyectos de trabajo
+La estructura de carpetas principal es:
+- `~/dev/docker/projects/`: Contiene todos tus proyectos, organizados por tecnología y categoría (ej: `projects/php/personal/mi-proyecto`).
+- `~/dev/docker/services/`: Contiene la configuración de los servicios de Docker.
+- `~/dev/docker/html/`: Para archivos estáticos servidos por Nginx.
+- `~/dev/docker/backups/`: Donde se guardan las copias de seguridad.
 
 **Uso:**
 1. Coloca tus archivos PHP en cualquiera de las carpetas
@@ -181,18 +164,24 @@ Este entorno incluye un script de gestión de proyectos que facilita la creació
 
 ### Estructura de Carpetas Generada:
 
-La estructura mínima y modular generada por `setup.sh` es:
+La estructura de carpetas optimizada que crea `setup.sh` es:
 
 ```
 ~/dev/docker/
-├── services/      # Servicios Docker (traefik, stack, nginx, etc.)
-├── projects/      # Proyectos de desarrollo (PHP, Node.js, Python, etc.)
-├── html/          # Archivos estáticos HTML
+├── services/
+├── projects/
+│   ├── php/
+│   │   ├── personal/
+│   │   └── work/
+│   ├── node/
+│   └── python/
+├── html/
+├── nginx-html/
+├── backups/
+└── examples/
 ```
 
-Puedes crear subcarpetas dentro de `projects/` según stack o tipo de proyecto según tus necesidades.
-
-Los scripts principales están en `scripts/` y la lógica auxiliar en `scripts/sub-scripts/`.
+Esta estructura centraliza todos los proyectos en la carpeta `projects`, simplificando la gestión.
 
 ## Comandos de Uso Básico
 

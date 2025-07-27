@@ -329,32 +329,20 @@ fi
 # 8. Crear estructura de carpetas
 log "[8/10] Creando estructura de carpetas en ~/dev/docker..."
 DEV_HOME="$HOME/dev"
-# Estructura pequeña pero funcional
-mkdir -p "$DEV_HOME/docker/services"
-mkdir -p "$DEV_HOME/docker/projects"
-mkdir -p "$DEV_HOME/docker/html"
-# Si se requiere, se pueden crear subcarpetas específicas más adelante
+# Estructura minimalista
+mkdir -p "$DEV_HOME/docker"/{services,projects,html}
 
-
-# Crear archivos de ejemplo para PHP
-echo "<?php echo '<h1>¡Hola desde PHP!</h1><p>Servidor PHP funcionando correctamente.</p><p>Debugging habilitado en puerto 9003</p>'; ?>" > "$DEV_HOME/docker/php-projects/index.php"
-echo "<?php echo '<h1>Proyectos Personales PHP</h1>'; ?>" > "$DEV_HOME/docker/php-personal/index.php"
-echo "<?php echo '<h1>Proyectos de Trabajo PHP</h1>'; ?>" > "$DEV_HOME/docker/php-work/index.php"
-
-# Crear archivos de ejemplo para Node.js
-echo "console.log('Contenedor Node.js listo!'); console.log('Debugging disponible en puerto 9229'); console.log('Frameworks: Angular, Vue, React instalados');" > "$DEV_HOME/docker/node-projects/README.txt"
-echo "console.log('Proyectos personales Node.js');" > "$DEV_HOME/docker/node-personal/README.txt"
-echo "console.log('Proyectos de trabajo Node.js');" > "$DEV_HOME/docker/node-work/README.txt"
-
-# Crear archivos de ejemplo para Python
-echo "# Entorno de Desarrollo Python\nprint('¡Hola desde Python!')\nprint('Flask, Django, FastAPI instalados')\nprint('Debugging disponible en puerto 5678')" > "$DEV_HOME/docker/python-projects/main.py"
-echo "# Proyectos personales Python\nprint('Proyectos personales')" > "$DEV_HOME/docker/python-personal/main.py"
-echo "# Proyectos de trabajo Python\nprint('Proyectos de trabajo')" > "$DEV_HOME/docker/python-work/main.py"
-
-# Crear archivo HTML para Nginx
-echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola desde Nginx!</h1><p>Servidor Nginx funcionando correctamente.</p></body></html>" > "$DEV_HOME/docker/nginx-html/index.html"
+# Crear archivos de ejemplo
+echo "<?php echo '<h1>Proyectos PHP</h1>'; ?>" > "$DEV_HOME/docker/projects/index.php"
+echo "console.log('Proyectos Node.js');" > "$DEV_HOME/docker/projects/README.txt"
+echo "print('Proyectos Python')" > "$DEV_HOME/docker/projects/main.py"
+echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola desde Nginx!</h1></body></html>" > "$DEV_HOME/docker/html/index.html"
 
 log " Carpetas y archivos de ejemplo creados."
+
+# Copiar up.sh y project-manager.sh a la carpeta principal de desarrollo Docker
+cp "$SCRIPT_DIR/up.sh" "$DEV_HOME/docker/up.sh"
+cp "$SCRIPT_DIR/project-manager.sh" "$DEV_HOME/docker/project-manager.sh"
 
 # Cambiar a la carpeta principal de desarrollo Docker
 cd "$DEV_HOME/docker"

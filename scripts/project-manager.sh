@@ -36,13 +36,14 @@ info() {
 
 # Configuración
 DEV_HOME="$HOME/dev/docker"
+PROJECTS_HOME="$DEV_HOME/projects"
 
 # Función para mostrar ayuda
 show_help() {
     echo "Gestor de Proyectos - Entorno de Desarrollo Docker"
     echo "Autor: nunezlagos"
     echo ""
-    echo "Uso: ./project-manager.sh [comando] [tipo] [categoría] [nombre]"
+    echo "Uso: ./project-manager.sh [comando] [tipo] [nombre]"
     echo ""
     echo "Comandos:"
     echo "  create    - Crear un nuevo proyecto"
@@ -59,21 +60,12 @@ show_help() {
     echo "  php       - Proyecto PHP"
     echo "  python    - Proyecto Python"
     echo "  node      - Proyecto Node.js"
-    echo "  angular   - Proyecto Angular"
-    echo "  react     - Proyecto React"
-    echo "  vue       - Proyecto Vue.js"
-    echo ""
-    echo "Categorías:"
-    echo "  general   - Proyectos generales/prueba"
-    echo "  personal  - Proyectos personales"
-    echo "  work      - Proyectos de trabajo"
     echo ""
     echo "Ejemplos:"
-    echo "  ./project-manager.sh create php personal mi-blog"
-    echo "  ./project-manager.sh create angular work dashboard-admin"
-    echo "  ./project-manager.sh create python personal api-rest"
-    echo "  ./project-manager.sh list php"
-    echo "  ./project-manager.sh delete php personal mi-blog"
+    echo "  ./project-manager.sh create php mi-blog"
+    echo "  ./project-manager.sh create python api-rest"
+    echo "  ./project-manager.sh list"
+    echo "  ./project-manager.sh delete php mi-blog"
     echo "  ./project-manager.sh start"
     echo "  ./project-manager.sh info"
 }
@@ -95,11 +87,10 @@ check_docker_status() {
 
 # Función para crear proyecto PHP
 create_php_project() {
-    local category="$1"
-    local name="$2"
-    local project_path="$DEV_HOME/$category/php/$name"
+    local name="$1"
+    local project_path="$PROJECTS_HOME/$name"
     
-    log "Creando proyecto PHP: $name en categoría: $category"
+    log "Creando proyecto PHP: $name"
     
     # Crear estructura de directorios
     mkdir -p "$project_path/public"
@@ -386,14 +377,14 @@ show_info() {
 main() {
     case "$1" in
         "create")
-            if [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
-                error "Uso: ./project-manager.sh create [tipo] [categoría] [nombre]"
+            if [ -z "$2" ] || [ -z "$3" ]; then
+                error "Uso: ./project-manager.sh create [tipo] [nombre]"
                 exit 1
             fi
             check_docker_status
             case "$2" in
                 "php")
-                    create_php_project "$3" "$4"
+                    create_php_project "$3"
                     ;;
                 "python")
                     create_python_project "$3" "$4"
