@@ -363,7 +363,7 @@ show_info() {
     echo "  - PHP: http://localhost:8085"
     echo "  - Python: http://localhost:8000"
     echo "  - Node.js: http://localhost:3000"
-    echo "  - Nginx: http://localhost:8086"
+    
     echo "  - MailHog: http://localhost:8025"
     echo "  - Traefik: http://localhost:8080"
     echo ""

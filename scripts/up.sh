@@ -124,7 +124,7 @@ echo "   - Panel Traefik: http://localhost:8080 (Nota: Puede tardar unos minutos
 echo "   - Desarrollo PHP: http://php.localhost (Debug: 9003) - Requiere configurar hosts"
 echo "   - Desarrollo Python: http://python.localhost (Debug: 5678) - Requiere configurar hosts"
 echo "   - Desarrollo Node.js: http://node.localhost (Debug: 9229) - Requiere configurar hosts"
-echo "   - Archivos Estáticos (Nginx): http://static.localhost - Requiere configurar hosts"
+
 echo "   - Gestor de correo: http://mail.localhost - Requiere configurar hosts"
 echo "   - phpMyAdmin: http://localhost:8081"
 echo "   - pgAdmin: http://localhost:8082"

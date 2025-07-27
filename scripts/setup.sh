@@ -340,7 +340,7 @@ mkdir -p "$DEV_HOME/docker"/{services,projects,html}
 echo "<?php echo '<h1>Proyectos PHP</h1>'; ?>" > "$DEV_HOME/docker/projects/index.php"
 echo "console.log('Proyectos Node.js');" > "$DEV_HOME/docker/projects/README.txt"
 echo "print('Proyectos Python')" > "$DEV_HOME/docker/projects/main.py"
-echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola desde Nginx!</h1></body></html>" > "$DEV_HOME/docker/html/index.html"
+echo "<!DOCTYPE html><html><head><title>Static Files</title></head><body><h1>¡Archivos estáticos!</h1></body></html>" > "$DEV_HOME/docker/html/index.html"
 
 log " Carpetas y archivos de ejemplo creados."
 
@@ -451,20 +451,7 @@ else
   log "ADVERTENCIA: No se encontró stack-compose.yml en $DOCKER_FILES_DIR/"
 fi
 
-# Copiar nginx.conf
-if [ -f "$DOCKER_FILES_DIR/nginx.conf" ]; then
-  if [ ! -f "$DEV_HOME/docker/stack/nginx.conf" ]; then
-    if cp "$DOCKER_FILES_DIR/nginx.conf" "$DEV_HOME/docker/stack/nginx.conf" 2>/dev/null; then
-      log " nginx.conf copiado correctamente"
-    else
-      handle_error "Error copiando nginx.conf"
-    fi
-  else
-    log " nginx.conf ya existe"
-  fi
-else
-  log "ADVERTENCIA: No se encontró nginx.conf en $DOCKER_FILES_DIR/"
-fi
+
 
 # Copiar php.ini
 if [ -f "$DOCKER_FILES_DIR/php.ini" ]; then
