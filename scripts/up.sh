@@ -5,9 +5,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 # Script de Inicio del Entorno de Desarrollo Docker
 # Autor: nunezlagos
 # Descripción: Inicia todos los servicios del entorno de desarrollo
+# Modularizado: Lógica delegada a sub-scripts en scripts/sub-scripts/
 
 set -e
 
+# Cargar funciones auxiliares si existen
+if [ -f "$SCRIPT_DIR/sub-scripts/validate_env.sh" ]; then
+    source "$SCRIPT_DIR/sub-scripts/validate_env.sh"
+fi
+if [ -f "$SCRIPT_DIR/sub-scripts/version_manager.sh" ]; then
+    source "$SCRIPT_DIR/sub-scripts/version_manager.sh"
+fi
 echo "Iniciando entorno de desarrollo Docker..."
 echo ""
 
@@ -23,6 +31,17 @@ if ! groups $USER | grep -qw docker; then
     echo "Advertencia: No estás en el grupo docker"
     echo "Ejecutar: newgrp docker"
 fi
+
+# Función para verificar si un puerto está en uso
+check_port() {
+    PORT=$1
+    # Usamos netstat y grep para verificar si el puerto está en la lista de puertos en escucha
+    if netstat -tuln | grep -q ":$PORT\b"; then
+        echo "Error: El puerto $PORT ya está en uso."
+        echo "Por favor, detenga el servicio que usa este puerto o cambie la configuración en config/stack-compose.yml."
+        exit 1
+    fi
+}
 
 # Ir al directorio de desarrollo
 DEV_HOME="$HOME/dev/docker"
@@ -54,6 +73,20 @@ if ! docker network ls | grep -qw traefik; then
     docker network create traefik
 fi
 
+# Verificar puertos antes de iniciar
+echo "Verificando puertos requeridos..."
+check_port 8080 # Traefik UI
+check_port 8081 # phpMyAdmin
+check_port 8082 # pgAdmin
+check_port 8083 # Mongo Express
+check_port 8084 # Redis Commander
+check_port 8085 # PHP
+check_port 8000 # Python
+check_port 3000 # Node.js
+check_port 1025 # Mailhog SMTP
+check_port 8025 # Mailhog Web
+check_port 8087 # Adminer
+
 echo "Iniciando proxy reverso Traefik..."
 docker-compose -f "$SCRIPT_DIR/../config/traefik-compose.yml" up -d
 
@@ -77,10 +110,11 @@ echo "   - Desarrollo Python: http://python.localhost (Debug: 5678)"
 echo "   - Desarrollo Node.js: http://node.localhost (Debug: 9229)"
 echo "   - Archivos Estáticos (Nginx): http://static.localhost (opcional)"
 echo "   - Gestor de correo: http://mail.localhost"
-echo "   - Adminer: http://localhost:8081"
-echo "   - phpMyAdmin: http://localhost:8082"
+echo "   - phpMyAdmin: http://localhost:8081"
+echo "   - pgAdmin: http://localhost:8082"
 echo "   - Mongo Express: http://localhost:8083"
 echo "   - Redis Commander: http://localhost:8084"
+echo "   - Adminer: http://localhost:8087"
 echo ""
 echo "Carpetas de proyectos:"
 echo "   PHP General: ~/dev/docker/php-projects/"

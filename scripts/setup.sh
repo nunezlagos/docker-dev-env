@@ -298,11 +298,12 @@ fi
 # 7. Crear estructura de carpetas
 log "[7/9] Creando estructura de carpetas en ~/dev/docker..."
 DEV_HOME="$HOME/dev"
-mkdir -p "$DEV_HOME/docker/traefik" "$DEV_HOME/docker/stack" \
-         "$DEV_HOME/docker/php-projects" "$DEV_HOME/docker/php-personal" "$DEV_HOME/docker/php-work" \
-         "$DEV_HOME/docker/node-projects" "$DEV_HOME/docker/node-personal" "$DEV_HOME/docker/node-work" \
-         "$DEV_HOME/docker/python-projects" "$DEV_HOME/docker/python-personal" "$DEV_HOME/docker/python-work" \
-         "$DEV_HOME/docker/nginx-html"
+# Estructura pequeña pero funcional
+mkdir -p "$DEV_HOME/docker/services"
+mkdir -p "$DEV_HOME/docker/projects"
+mkdir -p "$DEV_HOME/docker/html"
+# Si se requiere, se pueden crear subcarpetas específicas más adelante
+
 
 # Crear archivos de ejemplo para PHP
 echo "<?php echo '<h1>¡Hola desde PHP!</h1><p>Servidor PHP funcionando correctamente.</p><p>Debugging habilitado en puerto 9003</p>'; ?>" > "$DEV_HOME/docker/php-projects/index.php"

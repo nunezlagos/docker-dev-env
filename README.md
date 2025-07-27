@@ -32,6 +32,7 @@ sudo pacman -S git
 
 **1. Clonar el repositorio:**
 ```bash
+cd /tmp/
 git clone https://github.com/nunezlagos/docker-dev-env.git
 cd docker-dev-env/scripts/
 ```
@@ -326,14 +327,19 @@ Este entorno incluye un script de gestión de proyectos que facilita la creació
 ```
 
 ### Estructura de Carpetas Generada:
+
+La estructura mínima y modular generada por `setup.sh` es:
+
 ```
 ~/dev/docker/
-├── php-personal/mi-blog/
-├── php-work/proyecto-cliente/
-├── python-personal/api-rest/
-├── node-work/backend-api/
-└── ...
+├── services/      # Servicios Docker (traefik, stack, nginx, etc.)
+├── projects/      # Proyectos de desarrollo (PHP, Node.js, Python, etc.)
+├── html/          # Archivos estáticos HTML
 ```
+
+Puedes crear subcarpetas dentro de `projects/` según stack o tipo de proyecto según tus necesidades.
+
+Los scripts principales están en `scripts/` y la lógica auxiliar en `scripts/sub-scripts/`.
 
 ## Comandos de Uso Básico
 
