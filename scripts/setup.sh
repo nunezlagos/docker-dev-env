@@ -519,7 +519,8 @@ if [ -f "$SCRIPT_DIR/project-manager.sh" ]; then
 else
   log "ADVERTENCIA: No se encontró project-manager.sh en $SCRIPT_DIR/"
 fi
-
+ 
+cd ~/dev/docker
 # Resumen final
 log ""
 log "=== INSTALACIÓN COMPLETADA ==="

@@ -120,10 +120,10 @@ check_port 8025 # Mailhog Web
 check_port 8087 # Adminer
 
 echo "Iniciando proxy reverso Traefik..."
-docker-compose -f "$SCRIPT_DIR/../config/traefik-compose.yml" up -d
+docker-compose -f "$DEV_HOME/traefik/docker-compose.yml" up -d
 
 echo "Iniciando servicios de desarrollo..."
-docker-compose -f "$SCRIPT_DIR/../config/stack-compose.yml" up -d
+docker-compose -f "$DEV_HOME/stack/docker-compose.yml" up -d
 echo ""
 
 echo "Esperando que los servicios estén listos..."

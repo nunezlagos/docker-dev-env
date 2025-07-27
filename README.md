@@ -9,6 +9,7 @@
 ```bash
 # 1. Clona el repositorio y entra a la carpeta scripts
 cd /tmp/
+rm -rf docker-dev-env
 git clone https://github.com/nunezlagos/docker-dev-env.git
 cd docker-dev-env/scripts/
 
