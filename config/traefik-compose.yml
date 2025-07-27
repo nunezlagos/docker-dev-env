@@ -4,6 +4,8 @@ services:
     image: traefik:v2.11
     command:
       - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--entrypoints.api.address=:8080"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
