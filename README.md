@@ -1,93 +1,130 @@
 # Docker Development Environment
 
-Comprehensive Docker-based development environment featuring Traefik reverse proxy, multiple database systems, and essential development tools with automated setup and validation.
+**Author:** nunezlagos  
+**Description:** Complete development environment with Docker including multiple databases, development servers and administration tools.
 
-## System Requirements
+**Architecture:** Traefik reverse proxy with SSL support, multiple development services, and organized project structure.
 
-### Supported Operating Systems
-- Ubuntu 20.04 LTS or later
-- Debian 11 (Bullseye) or later  
-- Arch Linux (current)
+## Quick Start Guide
 
-### Hardware Requirements
-- Minimum: 4GB RAM, 20GB free disk space
-- Recommended: 8GB RAM, 50GB free disk space
-- Network: Internet connection required for package downloads
+### System Requirements
 
-### Pre-Installation Validation
+**Compatible systems:**
+- Ubuntu 20.04 or higher
+- Debian 11 or higher
+- Arch Linux
 
-Execute the following commands to verify system compatibility:
+**Minimum requirements:**
+- 4GB RAM
+- 20GB free space
+- Internet connection
 
+**Install Git (if not available):**
 ```bash
-# Verify operating system and version
-lsb_release -a
+# Ubuntu/Debian
+sudo apt update && sudo apt install git
 
-# Check system resources
-free -h
-df -h /
-
-# Validate required utilities
-curl --version || echo "curl not found - install with: sudo apt install curl"
-git --version || echo "git not found - install with: sudo apt install git"
-
-# Check current Docker installation (if any)
-docker --version 2>/dev/null || echo "Docker not installed - will be installed by setup script"
-docker-compose --version 2>/dev/null || echo "Docker Compose not installed - will be installed by setup script"
+# Arch Linux
+sudo pacman -S git
 ```
 
-## Installation
+### Installation
 
-### Automated Setup Process
-
+**1. Clone the repository:**
 ```bash
-# Clone repository
 git clone https://github.com/nunezlagos/docker-dev-env.git
 cd docker-dev-env
+```
 
-# Grant execution permissions
+**2. Run automatic installation:**
+```bash
 chmod +x setup.sh
-
-# Execute automated installation
 ./setup.sh
 ```
 
-### Installation Process Overview
-
-The setup script performs the following operations:
-1. System validation and dependency resolution
-2. Docker Engine installation and configuration
-3. Docker Compose installation with version compatibility checks
-4. User group management and permissions
-5. Firewall configuration (UFW on Ubuntu/Debian)
-6. Docker network creation
-7. Environment file generation
-8. Service composition file deployment
-9. Startup script creation
-10. Comprehensive system validation
-
-### Post-Installation Verification
-
-Execute these commands to validate the installation:
-
+**3. Restart your session:**
 ```bash
-# Verify Docker daemon status
-sudo systemctl status docker --no-pager
+# After installation, close and reopen your terminal
+# Or execute:
+newgrp docker
+```
 
-# Confirm user group membership
-id $USER | grep docker
+### Starting the Environment
 
-# Test Docker functionality
-docker run --rm hello-world
+**Configure environment (optional):**
+```bash
+cp .env.example .env
+# Edit .env file with your preferred settings
+```
 
-# Validate Docker Compose installation
-docker-compose --version
-docker compose version 2>/dev/null || echo "Docker Compose v2 not available"
+**Start all services:**
+```bash
+# Simple way (recommended)
+docker-compose up -d
 
-# Check network configuration
-docker network ls | grep traefik
+# Or using specific config
+docker-compose -f config/stack-compose.yml up -d
 
-# Verify firewall status (Ubuntu/Debian)
-sudo ufw status 2>/dev/null || echo "UFW not configured"
+# Or using the provided script
+   ./scripts/up.sh
+   ```
+
+## Daily Workflow
+
+### Quick Start for Daily Development
+
+1. **Start the environment:**
+   ```bash
+   # Opción simple
+   docker-compose up -d
+   
+   # O usando el script
+   ./scripts/up.sh
+   ```
+
+2. **Access services:**
+   - **Development servers:** http://php.localhost, http://python.localhost, http://node.localhost
+   - **Static files:** http://static.localhost (optional)
+   - **Email testing:** http://mail.localhost
+   - **Database admin:** http://localhost:8081 (Adminer)
+   - **Traefik dashboard:** http://localhost:8080
+
+3. **Create a new project:**
+   ```bash
+   ./project-manager.sh create php personal my-project
+   ./project-manager.sh create python work api-backend
+   ./project-manager.sh create angular personal dashboard
+   ```
+
+4. **Access containers for development:**
+   ```bash
+   docker exec -it stack_php_1 bash
+   docker exec -it stack_python_1 bash
+   docker exec -it stack_nodejs_1 sh
+   ```
+
+5. **Stop the environment when done:**
+   ```bash
+   docker-compose -f config/stack-compose.yml down
+   docker-compose -f config/traefik-compose.yml down
+   ```
+
+**Or manually:**
+```bash
+docker-compose -f config/traefik-compose.yml up -d
+docker-compose -f config/stack-compose.yml up -d
+```
+
+### Verification
+
+**Check running containers:**
+```bash
+docker ps
+```
+
+**View logs if issues occur:**
+```bash
+docker-compose logs
 ```
 
 ## 🎯 Comandos Post-Instalación
@@ -114,419 +151,483 @@ newgrp docker
 docker network ls | grep traefik
 ```
 
-## Usage
+## ¿Dónde Está Todo? - Acceso a los Servicios
 
-### Service Management
+Una vez que hayas ejecutado `./up.sh`, podrás acceder a todos los servicios desde tu navegador:
+
+## Available Services
+
+### Databases
+
+| Service | Port | User | Password | Database |
+|---------|------|------|----------|----------|
+| MySQL | 3306 | devuser | devpass | appdb |
+| PostgreSQL | 5432 | devuser | devpass | appdb |
+| MongoDB | 27017 | - | - | - |
+| Redis | 6379 | - | - | - |
+| MailHog | 8025 | - | - | - |
+
+### Development Servers
+
+| Service | Access URL | Debug Port | Description |
+|---------|------------|------------|-------------|
+| PHP 8.2 | http://localhost:8085 | 9003 | Apache + PHP with Xdebug |
+| Python 3.11 | http://localhost:8000 | 5678 | Flask, Django, FastAPI |
+| Node.js 18 | http://localhost:3000 | 9229 | Angular, Vue, React |
+| Nginx | http://localhost:8086 | - | Static file server |
+
+### Administration Tools
+
+| Tool | URL | User | Password |
+|------|-----|------|----------|
+| Traefik Dashboard | http://localhost:8080 | - | - |
+| phpMyAdmin (MySQL) | http://localhost:8081 | devuser | devpass |
+| pgAdmin (PostgreSQL) | http://localhost:8082 | admin@admin.com | admin |
+| Mongo Express (MongoDB) | http://localhost:8083 | - | - |
+| Redis Commander | http://localhost:8084 | - | - |
+| Adminer (Universal DB) | http://localhost:8087 | see below | see below |
+
+### Development Servers
+
+| Service | URL | Debug Port | Description |
+|---------|-----|------------|-------------|
+| **PHP + Apache** | http://localhost:8085 | 9003 | PHP server with Apache and Xdebug |
+| **Python** | http://localhost:8000 | 5678 | Python environment with Flask, Django, FastAPI |
+| **Node.js** | http://localhost:3000 | 9229 | Node.js environment with Angular, Vue, React |
+| **Nginx** | http://localhost:8086 | - | Static web server |
+
+### 🔗 Conexiones Directas a Bases de Datos
+
+**MySQL:**
+```bash
+# Conectar desde terminal
+mysql -h localhost -P 3306 -u devuser -p
+# Contraseña: devpass
+```
+
+**PostgreSQL:**
+```bash
+# Conectar desde terminal
+psql -h localhost -p 5432 -U devuser -d appdb
+# Contraseña: devpass
+```
+
+**MongoDB:**
+```bash
+# Conectar desde terminal
+mongo mongodb://localhost:27017
+# O con mongosh:
+mongosh mongodb://localhost:27017
+```
+
+**Redis:**
+```bash
+# Conectar desde terminal
+redis-cli -h localhost -p 6379
+```
+
+### 📋 Datos de Conexión para Bases de Datos
+
+**Para MySQL (phpMyAdmin):**
+- Servidor: `mysql`
+- Usuario: `devuser`
+- Contraseña: `devpass`
+- Base de datos: `appdb`
+
+**Para PostgreSQL (pgAdmin):**
+- Servidor: `postgres`
+- Usuario: `devuser`
+- Contraseña: `devpass`
+- Base de datos: `appdb`
+
+**Para Adminer (Universal):**
+- **MySQL:** Servidor: `mysql`, Usuario: `devuser`, Contraseña: `devpass`, BD: `appdb`
+- **PostgreSQL:** Servidor: `postgres`, Usuario: `devuser`, Contraseña: `devpass`, BD: `appdb`
+- **MongoDB:** No compatible con Adminer (usar Mongo Express)
+- **Redis:** No compatible con Adminer (usar Redis Commander)
+
+### 💻 Cómo Usar los Servidores de Desarrollo
+
+### 📁 Organización de Proyectos
+Cada tecnología tiene 3 carpetas disponibles:
+- **General**: Para proyectos de prueba y aprendizaje
+- **Personal**: Para proyectos personales
+- **Trabajo**: Para proyectos profesionales
+
+### PHP + Apache (Puerto 8085, Debug 9003)
+**Carpetas disponibles:**
+- `~/dev/docker/php-projects/` - Proyectos generales
+- `~/dev/docker/php-personal/` - Proyectos personales  
+- `~/dev/docker/php-work/` - Proyectos de trabajo
+
+**Uso:**
+1. Coloca tus archivos PHP en cualquiera de las carpetas
+2. Accede a: http://localhost:8085, http://localhost:8085/personal, http://localhost:8085/work
+3. **Debugging**: Configura tu IDE para conectar al puerto 9003
+4. Para reiniciar: `docker-compose restart php`
+
+### Python (Puerto 8000, Debug 5678)
+**Carpetas disponibles:**
+- `~/dev/docker/python-projects/` - Proyectos generales
+- `~/dev/docker/python-personal/` - Proyectos personales
+- `~/dev/docker/python-work/` - Proyectos de trabajo
+
+**Frameworks incluidos:** Flask, Django, FastAPI, Jupyter
+**Uso:**
+1. Accede al contenedor: `docker exec -it stack_python_1 bash`
+2. Navega a tu carpeta: `cd personal` o `cd work`
+3. Crea tu proyecto:
+   - **Flask**: `flask run --host=0.0.0.0 --port=8000`
+   - **Django**: `django-admin startproject mi_proyecto && cd mi_proyecto && python manage.py runserver 0.0.0.0:8000`
+   - **FastAPI**: `uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
+4. **Debugging**: Configura tu IDE para conectar al puerto 5678
+
+### Node.js (Puerto 3000, Debug 9229)
+**Carpetas disponibles:**
+- `~/dev/docker/node-projects/` - Proyectos generales
+- `~/dev/docker/node-personal/` - Proyectos personales
+- `~/dev/docker/node-work/` - Proyectos de trabajo
+
+**Frameworks incluidos:** Angular CLI, Vue CLI, Create React App, TypeScript
+**Uso:**
+1. Accede al contenedor: `docker exec -it stack_nodejs_1 sh`
+2. Navega a tu carpeta: `cd personal` o `cd work`
+3. Crea tu proyecto:
+   - **Angular**: `ng new mi-app && cd mi-app && ng serve --host 0.0.0.0`
+   - **React**: `npx create-react-app mi-app && cd mi-app && npm start`
+   - **Vue**: `vue create mi-app && cd mi-app && npm run serve`
+   - **Node.js simple**: `npm init && node app.js`
+4. **Debugging**: Configura tu IDE para conectar al puerto 9229
+5. Para desarrollo: `npm install -g nodemon && nodemon --inspect=0.0.0.0:9229 app.js`
+
+### Nginx (Puerto 8086)
+**Carpeta:**
+- `~/dev/docker/nginx-html/` - Archivos estáticos
+
+**Uso:**
+1. Coloca tus archivos HTML/CSS/JS en la carpeta
+2. Accede a: http://localhost:8086
+
+## Integrated Project Manager
+
+This environment includes a project management script that facilitates creation and organization of projects across different technologies.
+
+### Features:
+- Automatic project creation with base structure
+- Organization by categories: General, Personal, Work
+- Support for multiple technologies: PHP, Python, Node.js, Angular, React, Vue
+- Project listing and management
+- Automatic debugging configuration
+
+### Manager Usage:
+```bash
+# View complete help
+./project-manager.sh help
+
+# Create different project types
+./project-manager.sh create php personal my-blog
+./project-manager.sh create python work api-rest
+./project-manager.sh create angular personal dashboard
+./project-manager.sh create node work backend-api
+
+# List projects by technology
+./project-manager.sh list php
+./project-manager.sh list python
+
+# View environment status
+./project-manager.sh info
+```
+
+### Generated Folder Structure:
+```
+~/dev/docker/
+├── php-personal/my-blog/
+├── php-work/client-project/
+├── python-personal/api-rest/
+├── node-work/backend-api/
+└── ...
+```
+
+## Basic Usage Commands
+
+### Environment Management
 
 ```bash
-# Navigate to development environment
-cd ~/dev/docker
-
-# Start complete stack
+# Start all services
 ./up.sh
 
-# Alternative: Manual service startup
-cd traefik && docker-compose up -d
-cd ../stack && docker-compose up -d
+# Start manually
+docker-compose -f config/traefik-compose.yml up -d
+docker-compose -f config/stack-compose.yml up -d
 
 # Stop all services
-cd ~/dev/docker/stack && docker-compose down
-cd ../traefik && docker-compose down
+docker-compose -f config/stack-compose.yml down
+docker-compose -f config/traefik-compose.yml down
 
-# Stop services with volume removal (data destruction)
-cd ~/dev/docker/stack && docker-compose down -v
-cd ../traefik && docker-compose down -v
+# View service status
+docker-compose -f config/stack-compose.yml ps
+
+# View logs
+docker-compose -f config/stack-compose.yml logs -f
+
+# Restart services
+docker-compose -f config/stack-compose.yml restart
+
+# Start only static server (Nginx)
+docker-compose -f config/stack-compose.yml --profile static up nginx
 ```
 
-### Log Management
-
+### 📁 Gestión de Proyectos (Nuevo)
 ```bash
-# View aggregated logs
-cd ~/dev/docker/stack && docker-compose logs
+# Usar el gestor de proyectos
+./project-manager.sh help
 
-# Real-time log monitoring
-docker-compose logs -f
+# Crear proyectos
+./project-manager.sh create php personal mi-blog
+./project-manager.sh create python work api-rest
+./project-manager.sh create angular personal dashboard
+./project-manager.sh create react work ecommerce
 
-# Service-specific log analysis
-docker-compose logs mysql
-docker-compose logs postgresql
-docker-compose logs mongodb
-docker-compose logs redis
-docker-compose logs traefik
+# Listar proyectos
+./project-manager.sh list php
+./project-manager.sh list python
+./project-manager.sh list node
 
-# Log filtering by time
-docker-compose logs --since="1h" mysql
-docker-compose logs --tail=100 traefik
+# Ver información del entorno
+./project-manager.sh info
 ```
 
-### Container Management
-
+### 🔄 Reiniciar un Servicio Específico
 ```bash
-# View running containers
+# Reiniciar MySQL
+docker-compose -f stack-compose.yml restart mysql
+
+# Reiniciar PostgreSQL
+docker-compose -f stack-compose.yml restart postgres
+
+# Reiniciar MongoDB
+docker-compose -f stack-compose.yml restart mongodb
+```
+
+### 📊 Ver el Estado de los Servicios
+```bash
+# Ver qué contenedores están corriendo
 docker ps
 
-# View all containers (including stopped)
+# Ver todos los contenedores (incluso los detenidos)
 docker ps -a
-
-# Execute commands in running containers
-docker exec -it mysql_container mysql -u root -p
-docker exec -it postgres_container psql -U postgres
 ```
 
-## Service Access
-
-### Administrative Interfaces
-
-| Service | URL | Authentication |
-|---------|-----|---------------|
-| Traefik Dashboard | http://localhost:8080 | None required |
-| phpMyAdmin (MySQL) | http://localhost:8081 | root / rootpassword |
-| pgAdmin (PostgreSQL) | http://localhost:8082 | admin@admin.com / admin |
-| Mongo Express (MongoDB) | http://localhost:8083 | admin / pass |
-| Redis Commander | http://localhost:8084 | None required |
-
-### Direct Database Connections
-
+### Container Access
 ```bash
-# MySQL Database Connection
-mysql -h localhost -P 3306 -u devuser -p
-# Password: devpassword
-# Root access: mysql -h localhost -P 3306 -u root -p (Password: rootpassword)
-
-# PostgreSQL Database Connection
-psql -h localhost -p 5432 -U postgres -d postgres
-# Password: postgres
-
-# MongoDB Database Connection
-mongo mongodb://admin:mongopassword@localhost:27017/admin
-# Alternative: mongosh mongodb://admin:mongopassword@localhost:27017/admin
-
-# Redis Database Connection
-redis-cli -h localhost -p 6379
-# Authentication: AUTH redispassword
+# Access containers
+docker exec -it stack_nodejs_1 sh
+docker exec -it stack_python_1 bash
+docker exec -it stack_php_1 bash
+docker exec -it stack_mysql_1 mysql -u devuser -p
 ```
 
-### Connection Parameters
-
+### 📝 Ver Logs (Para Solucionar Problemas)
 ```bash
-# MySQL
-Host: localhost
-Port: 3306
-Database: devdb
-Username: devuser
-Password: devpassword
+# Ver logs de todos los servicios
+docker-compose -f stack-compose.yml logs
 
-# PostgreSQL
-Host: localhost
-Port: 5432
-Database: postgres
-Username: postgres
-Password: postgres
+# Ver logs de un servicio específico
+docker-compose -f stack-compose.yml logs mysql
 
-# MongoDB
-Host: localhost
-Port: 27017
-Database: admin
-Username: admin
-Password: mongopassword
-
-# Redis
-Host: localhost
-Port: 6379
-Password: redispassword
+# Ver logs en tiempo real
+docker-compose -f stack-compose.yml logs -f
 ```
 
-## Maintenance
+## ❗ Solución de Problemas Comunes
 
-### Docker System Maintenance
-
+### El entorno no inicia
 ```bash
-# System cleanup (removes unused resources)
-docker system prune -f
+# Verificar que Docker está corriendo
+sudo systemctl status docker
 
-# Comprehensive cleanup including volumes (data destruction)
-docker system prune -a --volumes -f
+# Si no está corriendo, iniciarlo
+sudo systemctl start docker
 
-# Selective cleanup operations
-docker container prune -f    # Remove stopped containers
-docker image prune -f         # Remove unused images
-docker network prune -f       # Remove unused networks
-docker volume prune -f        # Remove unused volumes (data loss)
+# Verificar que estás en el grupo docker
+groups $USER | grep docker
 
-# View system resource usage
-docker system df
-```
-
-### Service Management
-
-```bash
-# Restart Docker daemon
-sudo systemctl restart docker
-
-# Verify Docker daemon status
-sudo systemctl status docker --no-pager
-
-# Enable Docker daemon auto-start
-sudo systemctl enable docker
-
-# View Docker daemon logs
-journalctl -u docker.service --no-pager
-```
-
-### Container Updates
-
-```bash
-# Update container images
-cd ~/dev/docker/stack
-docker-compose pull
-
-# Recreate containers with updated images
-docker-compose up -d --force-recreate
-
-# Update specific service
-docker-compose pull mysql
-docker-compose up -d --no-deps mysql
-```
-
-### Backup Operations
-
-```bash
-# Database backup examples
-docker exec mysql_container mysqldump -u root -prootpassword devdb > backup_mysql.sql
-docker exec postgres_container pg_dump -U postgres postgres > backup_postgres.sql
-docker exec mongo_container mongodump --host localhost --port 27017 --out /backup
-
-# Volume backup
-docker run --rm -v mysql_data:/data -v $(pwd):/backup alpine tar czf /backup/mysql_backup.tar.gz /data
-```
-
-## Troubleshooting
-
-### Docker Compose Compatibility
-
-```bash
-# Verify Docker Compose installation
-docker-compose --version
-docker compose version 2>/dev/null || echo "Docker Compose v2 not available"
-
-# Legacy Docker Compose syntax (v1)
-docker-compose up -d
-docker-compose down
-
-# Modern Docker Compose syntax (v2)
-docker compose up -d
-docker compose down
-
-# Force Docker Compose v1 usage
-alias docker-compose="docker-compose"
-```
-
-### Permission Resolution
-
-```bash
-# Verify current user permissions
-id $USER
-groups $USER
-
-# Add user to docker group
+# Si no estás en el grupo, agregarte y reiniciar sesión
 sudo usermod -aG docker $USER
-
-# Apply group changes without logout
 newgrp docker
-
-# Verify Docker access
-docker run --rm hello-world
-
-# Fix Docker socket permissions (if needed)
-sudo chmod 666 /var/run/docker.sock
 ```
 
-### Network Configuration
-
+### Un servicio no funciona
 ```bash
-# Verify Docker networks
-docker network ls
-docker network inspect traefik
+# Ver qué contenedores están corriendo
+docker ps
 
-# Recreate Docker network
-docker network rm traefik
-docker network create traefik
+# Ver logs del servicio problemático
+docker-compose -f stack-compose.yml logs nombre_del_servicio
 
-# Check port conflicts
-sudo netstat -tulpn | grep :8080
-sudo lsof -i :8080
+# Reiniciar el servicio
+docker-compose -f stack-compose.yml restart nombre_del_servicio
 ```
 
-### Firewall Configuration
-
+### Error "puerto ya en uso"
 ```bash
-# UFW status verification
-sudo ufw status verbose
+# Ver qué está usando el puerto (ejemplo puerto 3306)
+sudo netstat -tulpn | grep 3306
 
-# Configure required ports
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 8080:8084/tcp
+# Detener el servicio que usa el puerto
+sudo systemctl stop mysql  # ejemplo para MySQL
 
-# Reset UFW configuration
-sudo ufw --force reset
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow ssh
-sudo ufw allow 80,443,8080:8084/tcp
-sudo ufw --force enable
+# O cambiar el puerto en el archivo docker-compose
 ```
 
-### Service Diagnostics
-
+### Limpiar todo y empezar de nuevo
 ```bash
-# Container status verification
-docker ps -a
-docker stats
+# Detener y eliminar todo
+docker-compose -f stack-compose.yml down -v
+docker-compose -f traefik-compose.yml down -v
 
-# Service-specific troubleshooting
-docker-compose logs --tail=50 mysql
-docker-compose logs --tail=50 traefik
+# Limpiar imágenes y contenedores
+docker system prune -a
 
-# Container health checks
-docker inspect mysql_container | grep Health
-docker exec mysql_container mysqladmin ping
-
-# Resource monitoring
-docker system df
-docker system events --since 1h
+# Volver a iniciar
+./up.sh
 ```
 
-### Common Error Resolution
+## Additional Information
 
+### Architecture Overview
+
+**Traefik Reverse Proxy:** All development services are accessible through Traefik with automatic routing and SSL support.
+
+### Port Configuration
+
+#### Web Services
+- **Traefik Dashboard:** Port 8080
+- **PHP Development:** http://php.localhost (via Traefik)
+- **Python Development:** http://python.localhost (via Traefik)
+- **Node.js Development:** http://node.localhost (via Traefik)
+- **Static Files (Nginx):** http://static.localhost (via Traefik, optional)
+
+#### Databases
+- **MySQL:** Port 3306
+- **PostgreSQL:** Port 5432
+- **MongoDB:** Port 27017
+- **Redis:** Port 6379
+
+#### Debugging Ports
+- **PHP (Xdebug):** Port 9003
+- **Python (debugpy):** Port 5678
+- **Node.js (Inspector):** Port 9229
+
+#### Administration Tools
+- **Adminer:** Port 8081
+- **phpMyAdmin:** Port 8082
+- **Mongo Express:** Port 8083
+- **Redis Commander:** Port 8084
+
+### Development Tips
+
+#### Development Tips
+
+#### Python Debugging
+- Install `debugpy` in your project: `pip install debugpy`
+- Configure your IDE to connect to port 5678
+- Use: `python -m debugpy --listen 0.0.0.0:5678 --wait-for-client your_script.py`
+
+#### Static Files
+- Use Nginx service only when needed: `docker-compose --profile static up nginx`
+- Access via http://static.localhost when Nginx is running
+
+#### Email Testing
+- Use MailHog at http://localhost:8025 to test email functionality
+- SMTP Configuration: Use `localhost:1025` as SMTP server in your applications
+
+#### Daily Workflow
+- See `docs/WORKFLOW.md` for complete daily usage guide
+
+### Important Notes
+
+**Port Usage:**
+- 8080-8087: Administration tools
+- 3000, 8000, 8085, 8086: Development servers
+- 3306, 5432, 27017, 6379: Database connections
+- 9003, 5678, 9229: Debugging ports
+
+**Project Organization:**
+- PHP: `~/dev/docker/php-projects/`, `~/dev/docker/php-personal/`, `~/dev/docker/php-work/`
+- Python: `~/dev/docker/python-projects/`, `~/dev/docker/python-personal/`, `~/dev/docker/python-work/`
+- Node.js: `~/dev/docker/node-projects/`, `~/dev/docker/node-personal/`, `~/dev/docker/node-work/`
+- Nginx: `~/dev/docker/nginx-html/`
+
+**Debugging Configuration:**
+- PHP: Xdebug on port 9003
+- Python: debugpy on port 5678
+- Node.js: Inspector on port 9229
+
+**Pre-installed Frameworks:**
+- PHP: Xdebug enabled
+- Python: Flask, Django, FastAPI, Jupyter
+- Node.js: Angular CLI, Vue CLI, React, TypeScript
+
+**Development Best Practices:**
+1. Always use `./up.sh` to start the environment
+2. Data is automatically persisted across restarts
+3. Check logs if issues occur: `docker-compose logs`
+4. For local development only - not for production use
+5. Restart Apache if changing PHP configuration
+6. Use `--reload` flag for Python frameworks auto-reload
+7. Use `nodemon` for Node.js development auto-reload
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **"Port already in use"**
+   ```bash
+   # Check what's using the port
+   sudo lsof -i :8080
+   # Kill the process
+   sudo kill -9 [PID]
+   ```
+
+2. **"Cannot connect to Docker"**
+   ```bash
+   # Restart Docker
+   sudo systemctl restart docker
+   # Add user to docker group
+   sudo usermod -aG docker $USER
+   ```
+
+3. **"Container won't start"**
+   ```bash
+   # View detailed logs
+   docker-compose logs [service-name]
+   ```
+
+**Useful Commands:**
 ```bash
-# "Port already in use" error
-sudo lsof -i :8080
-sudo kill -9 <PID>
+# Clean all Docker (CAUTION!)
+docker system prune -a
 
-# "Network not found" error
-docker network create traefik
-
-# "Permission denied" error
-sudo chown -R $USER:$USER ~/dev/docker
-chmod +x ~/dev/docker/up.sh
-
-# "Container name conflict" error
-docker rm -f conflicting_container_name
-```
-
-## Project Structure
-
-```
-docker-dev-env/
-├── setup.sh                    # Automated installation script
-├── README.md                   # Comprehensive documentation
-├── docker-files/
-│   ├── traefik-compose.yml     # Traefik reverse proxy configuration
-│   └── stack-compose.yml       # Database and service stack
-└── ~/dev/docker/               # Runtime environment (created during setup)
-    ├── .env                    # Environment configuration
-    ├── up.sh                   # Service orchestration script
-    ├── traefik/
-    │   └── docker-compose.yml  # Traefik service definition
-    └── stack/
-        └── docker-compose.yml  # Application stack definition
-```
-
-## Configuration Management
-
-### Environment Variables
-
-Modify `~/dev/docker/.env` for system customization:
-
-```bash
-# Project identification
-COMPOSE_PROJECT_NAME=devenv
-TRAEFIK_DOMAIN=localhost
-TRAEFIK_API_DASHBOARD=true
-TRAEFIK_LOG_LEVEL=INFO
-
-# Database authentication
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=devdb
-MYSQL_USER=devuser
-MYSQL_PASSWORD=devpassword
-
-# Redis configuration
-REDIS_PASSWORD=redispassword
-
-# Network topology
-DOCKER_NETWORK=traefik-network
-```
-
-### Service Extension
-
-Extend functionality by modifying `~/dev/docker/stack/docker-compose.yml`:
-
-```yaml
-services:
-  custom-service:
-    image: custom-image:latest
-    container_name: custom_service
-    restart: unless-stopped
-    networks:
-      - traefik
-    environment:
-      - CUSTOM_VAR=value
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.custom.rule=Host(`custom.localhost`)"
-      - "traefik.http.services.custom.loadbalancer.server.port=8080"
-    volumes:
-      - custom_data:/app/data
-
-volumes:
-  custom_data:
-    driver: local
-
-networks:
-  traefik:
-    external: true
-```
-
-## Technical Specifications
-
-### System Compatibility
-- Ubuntu 20.04 LTS or later
-- Debian 11 (Bullseye) or later
-- Arch Linux (current release)
-- Docker Engine 20.10 or later
-- Docker Compose 1.29 or later
-
-### Network Architecture
-- All services communicate through the `traefik` Docker network
-- Traefik acts as reverse proxy and load balancer
-- Database persistence via Docker volumes
-- Firewall configuration for secure external access
-
-### Security Considerations
-
-```bash
-# Change default passwords in .env file
-# Restrict network access using UFW
-# Use Docker secrets for sensitive data
-# Implement SSL/TLS certificates for production
-# Regular security updates for base images
-```
-
-### Performance Optimization
-
-```bash
-# Monitor resource usage
-docker stats
+# View space usage
 docker system df
 
-# Optimize container resources
-# Set memory and CPU limits in docker-compose.yml
-# Use multi-stage builds for custom images
-# Implement health checks for services
+# Update images
+docker-compose pull
 ```
 
-## Author
+---
 
-**nunezlagos** - Professional Docker Development Environment
+## Documentation Structure
+
+```
+├── docs/                 # Documentation
+│   ├── ARCHITECTURE.md   # Technical documentation
+│   └── WORKFLOW.md       # Daily workflow guide
+└── README.md             # Main documentation
+```
+
+---
+
+**Author:** nunezlagos  
+**Created for developers who want simplicity and power.**

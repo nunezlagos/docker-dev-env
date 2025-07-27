@@ -1,0 +1,31 @@
+# Docker Development Environment
+# Author: nunezlagos
+# Main compose file that references the organized configuration
+
+version: '3.8'
+
+# This file serves as a convenient entry point
+# All actual configuration is in config/stack-compose.yml
+
+# To use this environment:
+# docker-compose up -d
+
+# For Traefik (reverse proxy):
+# docker-compose -f config/traefik-compose.yml up -d
+
+# For the full stack:
+# docker-compose -f config/stack-compose.yml up -d
+
+# Or use the provided scripts:
+# ./scripts/up.sh
+
+services:
+  # This file includes the main stack configuration
+  # Run: docker-compose -f config/stack-compose.yml up -d
+  
+  # For convenience, you can also run:
+  # docker-compose up -d
+  # This will start the services defined in config/stack-compose.yml
+  
+include:
+  - config/stack-compose.yml

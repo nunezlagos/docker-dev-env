@@ -1,7 +1,7 @@
 #!/bin/bash
-# setup-dev.sh - Entorno de desarrollo completo validando dependencias
-# Compatible con Ubuntu, Debian y Arch
-# Autor: nunezlagos, sin rodeos
+# setup-dev.sh - Complete development environment with dependency validation
+# Compatible with Ubuntu, Debian and Arch
+# Author: nunezlagos
 set -euo pipefail
 
 # Variables globales
@@ -47,68 +47,68 @@ log "Autor: nunezlagos"
 log "Iniciando setup..."
 log "Log guardado en: $LOG_FILE"
 
-# 1. Detectar Distribución
-log "[1/9] Detectando distribución..."
+# 1. Detect Distribution
+log "[1/9] Detecting distribution..."
 if [ -f /etc/os-release ]; then
   . /etc/os-release
   DISTRO=$ID
-  log "Distro detectada: $DISTRO"
+  log "Distribution detected: $DISTRO"
 else
-  log "ERROR: No se pudo detectar la distribución."
-  log "Intentando detectar manualmente..."
+  log "ERROR: Could not detect distribution."
+  log "Attempting manual detection..."
   if command -v apt >/dev/null 2>&1; then
     DISTRO="ubuntu"
-    log "Detectado sistema basado en Debian/Ubuntu"
+    log "Detected Debian/Ubuntu based system"
   elif command -v pacman >/dev/null 2>&1; then
     DISTRO="arch"
-    log "Detectado sistema Arch Linux"
+    log "Detected Arch Linux system"
   else
-    log "ADVERTENCIA: Sistema no soportado, asumiendo Ubuntu"
+    log "WARNING: Unsupported system, assuming Ubuntu"
     DISTRO="ubuntu"
   fi
 fi
 
-# 2. Instalar dependencias base
-log "[2/9] Verificando dependencias base (curl, git)..."
+# 2. Install base dependencies
+log "[2/9] Checking base dependencies (curl, git)..."
 
 install_packages_debian() {
-  log "Actualizando repositorios..."
-  retry sudo apt update || handle_error "apt update falló"
-  log "Instalando paquetes base..."
-  retry sudo apt install -y curl git ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Instalación de paquetes base falló"
+  log "Updating repositories..."
+  retry sudo apt update || handle_error "apt update failed"
+  log "Installing base packages..."
+  retry sudo apt install -y curl git ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Base packages installation failed"
 }
 
 install_packages_arch() {
-  log "Actualizando repositorios Arch..."
-  retry sudo pacman -Sy --noconfirm || handle_error "pacman sync falló"
-  log "Instalando paquetes base..."
-  retry sudo pacman -S --noconfirm curl git || handle_error "Instalación de paquetes base falló"
+  log "Updating Arch repositories..."
+  retry sudo pacman -Sy --noconfirm || handle_error "pacman sync failed"
+  log "Installing base packages..."
+  retry sudo pacman -S --noconfirm curl git || handle_error "Base packages installation failed"
 }
 
-# Verificar e instalar dependencias
+# Check and install dependencies
 missing_deps=()
 ! command -v curl >/dev/null && missing_deps+=("curl")
 ! command -v git >/dev/null && missing_deps+=("git")
 
 if [ ${#missing_deps[@]} -gt 0 ]; then
-  log "Dependencias faltantes: ${missing_deps[*]}"
-  log "Instalando dependencias base..."
+  log "Missing dependencies: ${missing_deps[*]}"
+  log "Installing base dependencies..."
   case $DISTRO in
     ubuntu|debian) install_packages_debian ;;
     arch) install_packages_arch ;;
-    *) log "ADVERTENCIA: Distro no soportada para instalación automática" ;;
+    *) log "WARNING: Distribution not supported for automatic installation" ;;
   esac
   
-  # Verificar instalación
+  # Verify installation
   for dep in "${missing_deps[@]}"; do
     if command -v "$dep" >/dev/null; then
-      log "✓ $dep instalado correctamente"
+      log "$dep installed successfully"
     else
-      log "✗ $dep no se pudo instalar"
+      log "$dep could not be installed"
     fi
   done
 else
-  log "✓ Dependencias base ya instaladas."
+  log "Base dependencies already installed."
 fi
 
 # 3. Instalar Docker
@@ -297,8 +297,31 @@ fi
 # 7. Crear estructura de carpetas
 log "[7/9] Creando estructura de carpetas en ~/dev/docker..."
 DEV_HOME="$HOME/dev"
-mkdir -p "$DEV_HOME/docker/traefik" "$DEV_HOME/docker/stack"
-log "✓ Carpetas creadas."
+mkdir -p "$DEV_HOME/docker/traefik" "$DEV_HOME/docker/stack" \
+         "$DEV_HOME/docker/php-projects" "$DEV_HOME/docker/php-personal" "$DEV_HOME/docker/php-work" \
+         "$DEV_HOME/docker/node-projects" "$DEV_HOME/docker/node-personal" "$DEV_HOME/docker/node-work" \
+         "$DEV_HOME/docker/python-projects" "$DEV_HOME/docker/python-personal" "$DEV_HOME/docker/python-work" \
+         "$DEV_HOME/docker/nginx-html"
+
+# Crear archivos de ejemplo para PHP
+echo "<?php echo '<h1>¡Hola desde PHP!</h1><p>Servidor PHP funcionando correctamente.</p><p>Debugging habilitado en puerto 9003</p>'; ?>" > "$DEV_HOME/docker/php-projects/index.php"
+echo "<?php echo '<h1>Proyectos Personales PHP</h1>'; ?>" > "$DEV_HOME/docker/php-personal/index.php"
+echo "<?php echo '<h1>Proyectos de Trabajo PHP</h1>'; ?>" > "$DEV_HOME/docker/php-work/index.php"
+
+# Crear archivos de ejemplo para Node.js
+echo "console.log('Node.js container ready!'); console.log('Debugging disponible en puerto 9229'); console.log('Frameworks: Angular, Vue, React instalados');" > "$DEV_HOME/docker/node-projects/README.txt"
+echo "console.log('Proyectos personales Node.js');" > "$DEV_HOME/docker/node-personal/README.txt"
+echo "console.log('Proyectos de trabajo Node.js');" > "$DEV_HOME/docker/node-work/README.txt"
+
+# Crear archivos de ejemplo para Python
+echo "# Python Development Environment\nprint('¡Hola desde Python!')\nprint('Flask, Django, FastAPI instalados')\nprint('Debugging disponible en puerto 5678')" > "$DEV_HOME/docker/python-projects/main.py"
+echo "# Proyectos personales Python\nprint('Proyectos personales')" > "$DEV_HOME/docker/python-personal/main.py"
+echo "# Proyectos de trabajo Python\nprint('Proyectos de trabajo')" > "$DEV_HOME/docker/python-work/main.py"
+
+# Crear archivo HTML para Nginx
+echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola desde Nginx!</h1><p>Servidor Nginx funcionando correctamente.</p></body></html>" > "$DEV_HOME/docker/nginx-html/index.html"
+
+log "✓ Carpetas y archivos de ejemplo creados."
 
 # 8. Configurar archivos de entorno
 log "[8/9] Configurando archivos de entorno..."
@@ -371,6 +394,36 @@ else
   log "ADVERTENCIA: No se encontró stack-compose.yml en $DOCKER_FILES_DIR/"
 fi
 
+# Copiar nginx.conf
+if [ -f "$DOCKER_FILES_DIR/nginx.conf" ]; then
+  if [ ! -f "$DEV_HOME/docker/stack/nginx.conf" ]; then
+    if cp "$DOCKER_FILES_DIR/nginx.conf" "$DEV_HOME/docker/stack/nginx.conf" 2>/dev/null; then
+      log "✓ nginx.conf copiado correctamente"
+    else
+      handle_error "Error copiando nginx.conf"
+    fi
+  else
+    log "✓ nginx.conf ya existe"
+  fi
+else
+  log "ADVERTENCIA: No se encontró nginx.conf en $DOCKER_FILES_DIR/"
+fi
+
+# Copiar php.ini
+if [ -f "$DOCKER_FILES_DIR/php.ini" ]; then
+  if [ ! -f "$DEV_HOME/docker/stack/php.ini" ]; then
+    if cp "$DOCKER_FILES_DIR/php.ini" "$DEV_HOME/docker/stack/php.ini" 2>/dev/null; then
+      log "✓ php.ini copiado correctamente"
+    else
+      handle_error "Error copiando php.ini"
+    fi
+  else
+    log "✓ php.ini ya existe"
+  fi
+else
+  log "ADVERTENCIA: No se encontró php.ini en $DOCKER_FILES_DIR/"
+fi
+
 # 10. Crear script para levantar stack
 log "[10/10] Creando script para levantar stack..."
 UP_SCRIPT="$DEV_HOME/docker/up.sh"
@@ -394,6 +447,26 @@ EOF
   else
     handle_error "Error creando script up.sh"
   fi
+fi
+
+# Copiar y hacer ejecutable el gestor de proyectos
+SCRIPT_DIR="$(dirname "$0")"
+if [ -f "$SCRIPT_DIR/project-manager.sh" ]; then
+  if [ ! -f "$DEV_HOME/docker/project-manager.sh" ]; then
+    if cp "$SCRIPT_DIR/project-manager.sh" "$DEV_HOME/docker/project-manager.sh" 2>/dev/null; then
+      if chmod +x "$DEV_HOME/docker/project-manager.sh" 2>/dev/null; then
+        log "✓ Gestor de proyectos copiado y configurado como ejecutable"
+      else
+        handle_error "Error asignando permisos al gestor de proyectos"
+      fi
+    else
+      handle_error "Error copiando gestor de proyectos"
+    fi
+  else
+    log "✓ Gestor de proyectos ya existe"
+  fi
+else
+  log "ADVERTENCIA: No se encontró project-manager.sh en $SCRIPT_DIR/"
 fi
 
 # Resumen final
