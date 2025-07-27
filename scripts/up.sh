@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
 # Script de Inicio del Entorno de Desarrollo Docker
 # Autor: nunezlagos
 # Descripción: Inicia todos los servicios del entorno de desarrollo
@@ -53,10 +55,10 @@ if ! docker network ls | grep -qw traefik; then
 fi
 
 echo "Iniciando proxy reverso Traefik..."
-docker-compose -f config/traefik-compose.yml up -d
+docker-compose -f "$SCRIPT_DIR/../config/traefik-compose.yml" up -d
 
 echo "Iniciando servicios de desarrollo..."
-docker-compose -f config/stack-compose.yml up -d
+docker-compose -f "$SCRIPT_DIR/../config/stack-compose.yml" up -d
 echo ""
 
 echo "Esperando que los servicios estén listos..."
