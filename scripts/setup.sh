@@ -356,6 +356,9 @@ echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola des
 
 log " Carpetas y archivos de ejemplo creados."
 
+# Cambiar a la carpeta principal de desarrollo Docker
+cd "$DEV_HOME/docker"
+
 # 8. Configurar archivos de entorno
 log "[8/9] Configurando archivos de entorno..."
 
