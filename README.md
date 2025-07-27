@@ -33,7 +33,7 @@ sudo pacman -S git
 **1. Clonar el repositorio:**
 ```bash
 git clone https://github.com/nunezlagos/docker-dev-env.git
-cd docker-dev-env/config
+cd docker-dev-env/scripts/
 ```
 
 **2. Ejecutar instalación automática:**
@@ -59,15 +59,10 @@ cp .env.example .env
 
 **Iniciar todos los servicios:**
 ```bash
-# Forma simple (recomendada)
-docker-compose up -d
+# Iniciar todos los servicios con el script proporcionado
 
-# O usando configuración específica
-docker-compose -f config/stack-compose.yml up -d
-
-# O usando el script proporcionado
-   ./scripts/up.sh
-   ```
+./up.sh
+```
 
 ## Flujo de Trabajo Diario
 
@@ -75,11 +70,7 @@ docker-compose -f config/stack-compose.yml up -d
 
 1. **Iniciar el entorno:**
    ```bash
-   # Opción simple
-   docker-compose up -d
-   
-   # O usando el script
-   ./scripts/up.sh
+   ./up.sh
    ```
 
 2. **Acceder a los servicios:**
@@ -105,15 +96,8 @@ docker-compose -f config/stack-compose.yml up -d
 
 5. **Detener el entorno al terminar:**
    ```bash
-   docker-compose -f config/stack-compose.yml down
-   docker-compose -f config/traefik-compose.yml down
+   ./down.sh
    ```
-
-**O manualmente:**
-```bash
-docker-compose -f config/traefik-compose.yml up -d
-docker-compose -f config/stack-compose.yml up -d
-```
 
 ### Verificación
 
@@ -185,7 +169,7 @@ Una vez que hayas ejecutado `./up.sh`, podrás acceder a todos los servicios des
 | pgAdmin (PostgreSQL) | http://localhost:8082 | admin@admin.com | admin |
 | Mongo Express (MongoDB) | http://localhost:8083 | - | - |
 | Redis Commander | http://localhost:8084 | - | - |
-| Adminer (BD Universal) | http://localhost:8087 | ver abajo | ver abajo |
+| Adminer (BD Universal) | http://localhost:8087 | - | - |
 
 ### Servidores de Desarrollo
 
@@ -359,25 +343,21 @@ Este entorno incluye un script de gestión de proyectos que facilita la creació
 # Iniciar todos los servicios
 ./up.sh
 
-# Iniciar manualmente
-docker-compose -f config/traefik-compose.yml up -d
-docker-compose -f config/stack-compose.yml up -d
-
 # Detener todos los servicios
-docker-compose -f config/stack-compose.yml down
-docker-compose -f config/traefik-compose.yml down
+./down.sh
 
 # Ver estado de servicios
-docker-compose -f config/stack-compose.yml ps
+./project-manager.sh status
 
 # Ver logs
-docker-compose -f config/stack-compose.yml logs -f
+./project-manager.sh logs
 
 # Reiniciar servicios
-docker-compose -f config/stack-compose.yml restart
+./project-manager.sh restart
 
 # Iniciar solo servidor estático (Nginx)
-docker-compose -f config/stack-compose.yml --profile static up nginx
+# (Funcionalidad avanzada, editar docker-compose.yml si es necesario)
+# docker-compose --profile static up nginx
 ```
 
 ### Gestión de Proyectos (Nuevo)
@@ -523,10 +503,11 @@ docker system prune -a
 - **Node.js (Inspector):** Puerto 9229
 
 #### Herramientas de Administración
-- **Adminer:** Puerto 8081
-- **phpMyAdmin:** Puerto 8082
+- **phpMyAdmin:** Puerto 8081
+- **pgAdmin:** Puerto 8082
 - **Mongo Express:** Puerto 8083
 - **Redis Commander:** Puerto 8084
+- **Adminer:** Puerto 8087
 
 ### Consejos de Desarrollo
 
