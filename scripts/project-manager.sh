@@ -73,6 +73,7 @@ show_help() {
     echo "  ./project-manager.sh create angular work dashboard-admin"
     echo "  ./project-manager.sh create python personal api-rest"
     echo "  ./project-manager.sh list php"
+    echo "  ./project-manager.sh delete php personal mi-blog"
     echo "  ./project-manager.sh start"
     echo "  ./project-manager.sh info"
 }
@@ -236,14 +237,103 @@ EOF
 create_angular_project() {
     local category="$1"
     local name="$2"
+    local project_path="$DEV_HOME/$category/node/$name"
+
+    if [ -d "$project_path" ]; then
+        error "El proyecto '$name' ya existe en '$project_path'"
+        exit 1
+    fi
     
     log "Creando proyecto Angular '$name' en categoría '$category'..."
     info "Esto puede tomar unos minutos..."
     
-    docker exec -it stack_nodejs_1 sh -c "cd $category && ng new $name --routing --style=css --skip-git && cd $name && ng serve --host 0.0.0.0 --port 3000" &
+    docker exec -it stack_nodejs_1 sh -c "cd /var/www/node-projects/$category && ng new $name --routing --style=css --skip-git"
     
-    log "Proyecto Angular '$name' en proceso de creación"
-    info "Acceso: http://localhost:3000 (una vez completado)"
+    log "Proyecto Angular '$name' creado."
+    info "Para iniciarlo, accede al contenedor y ejecuta:"
+    info "  cd /var/www/node-projects/$category/$name && ng serve --host 0.0.0.0 --port 3000"
+}
+
+# Función para crear proyecto React
+create_react_project() {
+    local category="$1"
+    local name="$2"
+    local project_path="$DEV_HOME/$category/node/$name"
+
+    if [ -d "$project_path" ]; then
+        error "El proyecto '$name' ya existe en '$project_path'"
+        exit 1
+    fi
+    
+    log "Creando proyecto React '$name' en categoría '$category'..."
+    info "Esto puede tomar unos minutos..."
+    
+    docker exec -it stack_nodejs_1 sh -c "cd /var/www/node-projects/$category && npx create-react-app $name"
+    
+    log "Proyecto React '$name' creado."
+    info "Para iniciarlo, accede al contenedor y ejecuta:"
+    info "  cd /var/www/node-projects/$category/$name && npm start"
+}
+
+# Función para crear proyecto Vue
+create_vue_project() {
+    local category="$1"
+    local name="$2"
+    local project_path="$DEV_HOME/$category/node/$name"
+
+    if [ -d "$project_path" ]; then
+        error "El proyecto '$name' ya existe en '$project_path'"
+        exit 1
+    fi
+    
+    log "Creando proyecto Vue '$name' en categoría '$category'..."
+    info "Esto puede tomar unos minutos..."
+    
+    docker exec -it stack_nodejs_1 sh -c "cd /var/www/node-projects/$category && vue create $name --default"
+    
+    log "Proyecto Vue '$name' creado."
+    info "Para iniciarlo, accede al contenedor y ejecuta:"
+    info "  cd /var/www/node-projects/$category/$name && npm run serve"
+}
+
+# Función para eliminar un proyecto
+delete_project() {
+    local type="$1"
+    local category="$2"
+    local name="$3"
+    local project_path=""
+
+    case "$type" in
+        "php")
+            project_path="$DEV_HOME/$category/php/$name"
+            ;;
+        "python")
+            project_path="$DEV_HOME/$category/python/$name"
+            ;;
+        "node" | "angular" | "react" | "vue")
+            project_path="$DEV_HOME/$category/node/$name"
+            ;;
+        *)
+            error "Tipo de proyecto no válido: $type"
+            exit 1
+            ;;
+    esac
+
+    if [ ! -d "$project_path" ]; then
+        error "El proyecto '$name' no existe en '$project_path'"
+        exit 1
+    fi
+
+    info "¿Estás seguro de que deseas eliminar el proyecto '$name' en '$project_path'?"
+    read -p "Escribe 'si' para confirmar: " confirmation
+
+    if [ "$confirmation" == "si" ]; then
+        log "Eliminando proyecto '$name'..."
+        rm -rf "$project_path"
+        log "Proyecto '$name' eliminado."
+    else
+        info "Eliminación cancelada."
+    fi
 }
 
 # Función para listar proyectos
@@ -296,6 +386,10 @@ show_info() {
 main() {
     case "$1" in
         "create")
+            if [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
+                error "Uso: ./project-manager.sh create [tipo] [categoría] [nombre]"
+                exit 1
+            fi
             check_docker_status
             case "$2" in
                 "php")
@@ -311,10 +405,10 @@ main() {
                     create_angular_project "$3" "$4"
                     ;;
                 "react")
-                    docker exec -it stack_nodejs_1 sh -c "cd $3 && npx create-react-app $4 && cd $4 && npm start"
+                    create_react_project "$4" "$5"
                     ;;
                 "vue")
-                    docker exec -it stack_nodejs_1 sh -c "cd $3 && vue create $4 && cd $4 && npm run serve"
+                    create_vue_project "$4" "$5"
                     ;;
                 *)
                     error "Tipo de proyecto no válido: $2"
@@ -325,6 +419,13 @@ main() {
             ;;
         "list")
             list_projects "$2"
+            ;;
+        "delete")
+            if [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
+                error "Uso: ./project-manager.sh delete [tipo] [categoría] [nombre]"
+                exit 1
+            fi
+            delete_project "$2" "$3" "$4"
             ;;
         "start")
             log "Iniciando stack de desarrollo..."

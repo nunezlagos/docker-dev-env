@@ -212,7 +212,7 @@ fi
 # Verificar docker-compose
 log "Verificando docker-compose..."
 if command -v docker-compose >/dev/null; then
-  local compose_version=$(docker-compose --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+  compose_version=$(docker-compose --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
   log "✓ docker-compose versión $compose_version ya instalado"
 else
   log "docker-compose no encontrado. Instalando..."
@@ -268,7 +268,7 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
       log "✗ UFW no se pudo instalar"
     fi
   else
-    local ufw_version=$(ufw --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+    ufw_version=$(ufw --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
     log "✓ UFW versión $ufw_version ya instalado"
   fi
   

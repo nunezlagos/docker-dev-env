@@ -33,7 +33,7 @@ sudo pacman -S git
 **1. Clonar el repositorio:**
 ```bash
 git clone https://github.com/nunezlagos/docker-dev-env.git
-cd docker-dev-env
+cd docker-dev-env/config
 ```
 
 **2. Ejecutar instalación automática:**
@@ -333,6 +333,9 @@ Este entorno incluye un script de gestión de proyectos que facilita la creació
 # Listar proyectos por tecnología
 ./project-manager.sh list php
 ./project-manager.sh list python
+
+# Eliminar un proyecto
+./project-manager.sh delete php personal mi-blog
 
 # Ver estado del entorno
 ./project-manager.sh info
