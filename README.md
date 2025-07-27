@@ -1,203 +1,55 @@
 # Entorno de Desarrollo Docker
 
-**Autor:** nunezlagos  
-**Descripción:** Entorno de desarrollo completo con Docker incluyendo múltiples bases de datos, servidores de desarrollo y herramientas de administración.
+**Autor:** nunezlagos
 
-**Arquitectura:** Proxy reverso Traefik con soporte SSL, múltiples servicios de desarrollo y estructura de proyecto organizada.
-
-## Guía de Inicio Rápido
-
-### Requisitos del Sistema
-
-**Sistemas compatibles:**
-- Ubuntu 20.04 o superior
-- Debian 11 o superior
-- Arch Linux
-
-**Requisitos mínimos:**
-- 4GB RAM
-- 20GB espacio libre
-- Conexión a internet
-
-**Instalar Git (si no está disponible):**
-```bash
-# Ubuntu/Debian
-sudo apt update && sudo apt install git
-
-# Arch Linux
-sudo pacman -S git
-```
+## Guía Rápida
 
 ### Instalación
 
-**1. Clonar el repositorio:**
 ```bash
+# 1. Clona el repositorio y entra a la carpeta scripts
 cd /tmp/
 git clone https://github.com/nunezlagos/docker-dev-env.git
 cd docker-dev-env/scripts/
-```
 
-**2. Ejecutar instalación automática:**
-```bash
+# 2. Ejecuta el instalador
 chmod +x setup.sh
 ./setup.sh
-```
 
-**3. Reiniciar tu sesión:**
-```bash
-# Después de la instalación, cierra y reabre tu terminal
-# O ejecuta:
+# 3. Reinicia tu terminal o ejecuta:
 newgrp docker
 ```
 
-### Iniciando el Entorno
+### Uso Básico
 
-**Configurar entorno (opcional):**
 ```bash
-cp .env.example .env
-# Editar archivo .env con tus configuraciones preferidas
-```
-
-**Iniciar todos los servicios:**
-```bash
-# Iniciar todos los servicios con el script proporcionado
-
+# Inicia todos los servicios
 ./up.sh
+
+# Crea un nuevo proyecto
+./project-manager.sh create php personal mi-proyecto
+
+# Accede a los servicios en tu navegador
+# Ejemplo: http://php.localhost, http://python.localhost, http://node.localhost
+
+# Detén el entorno
+./down.sh
 ```
 
-## Flujo de Trabajo Diario
+### Estructura de Carpetas
 
-### Inicio Rápido para Desarrollo Diario
-
-1. **Iniciar el entorno:**
-   ```bash
-   ./up.sh
-   ```
-
-2. **Acceder a los servicios:**
-   - **Servidores de desarrollo:** http://php.localhost, http://python.localhost, http://node.localhost
-   - **Archivos estáticos:** http://static.localhost (opcional)
-   - **Pruebas de email:** http://mail.localhost
-   - **Administrador de BD:** http://localhost:8081 (Adminer)
-   - **Panel de Traefik:** http://localhost:8080
-
-3. **Crear un nuevo proyecto:**
-   ```bash
-   ./project-manager.sh create php personal mi-proyecto
-   ./project-manager.sh create python work api-backend
-   ./project-manager.sh create angular personal dashboard
-   ```
-
-4. **Acceder a contenedores para desarrollo:**
-   ```bash
-   docker exec -it stack_php_1 bash
-   docker exec -it stack_python_1 bash
-   docker exec -it stack_nodejs_1 sh
-   ```
-
-5. **Detener el entorno al terminar:**
-   ```bash
-   ./down.sh
-   ```
-
-### Verificación
-
-**Verificar contenedores en ejecución:**
-```bash
-docker ps
+```
+~/dev/docker/
+├── services/      # Servicios Docker (traefik, stack, nginx, etc.)
+├── projects/      # Proyectos de desarrollo (PHP, Node.js, Python, etc.)
+├── html/          # Archivos estáticos HTML
+├── backups/       # Backups automáticos
+├── examples/      # Ejemplos y plantillas
 ```
 
-**Ver logs si ocurren problemas:**
-```bash
-docker-compose logs
-```
+### Más información
 
-## Comandos Post-Instalación
-
-### Verificar que Docker esté funcionando:
-```bash
-docker --version
-docker-compose --version
-sudo systemctl status docker
-```
-
-### Verificar que estés en el grupo docker:
-```bash
-groups $USER
-```
-
-### Si necesitas activar el grupo docker sin reiniciar:
-```bash
-newgrp docker
-```
-
-### Verificar la red de Traefik:
-```bash
-docker network ls | grep traefik
-```
-
-## ¿Dónde Está Todo? - Acceso a los Servicios
-
-Una vez que hayas ejecutado `./up.sh`, podrás acceder a todos los servicios desde tu navegador:
-
-## Servicios Disponibles
-
-### Bases de Datos
-
-| Servicio | Puerto | Usuario | Contraseña | Base de Datos |
-|----------|--------|---------|------------|---------------|
-| MySQL | 3306 | devuser | devpass | appdb |
-| PostgreSQL | 5432 | devuser | devpass | appdb |
-| MongoDB | 27017 | - | - | - |
-| Redis | 6379 | - | - | - |
-| MailHog | 8025 | - | - | - |
-
-### Servidores de Desarrollo
-
-| Servicio | URL de Acceso | Puerto Debug | Descripción |
-|----------|---------------|--------------|-------------|
-| PHP 8.2 | http://localhost:8085 | 9003 | Apache + PHP con Xdebug |
-| Python 3.11 | http://localhost:8000 | 5678 | Flask, Django, FastAPI |
-| Node.js 18 | http://localhost:3000 | 9229 | Angular, Vue, React |
-| Nginx | http://localhost:8086 | - | Servidor de archivos estáticos |
-
-### Herramientas de Administración
-
-| Herramienta | URL | Usuario | Contraseña |
-|-------------|-----|---------|------------|
-| Panel Traefik | http://localhost:8080 | - | - |
-| phpMyAdmin (MySQL) | http://localhost:8081 | devuser | devpass |
-| pgAdmin (PostgreSQL) | http://localhost:8082 | admin@admin.com | admin |
-| Mongo Express (MongoDB) | http://localhost:8083 | - | - |
-| Redis Commander | http://localhost:8084 | - | - |
-| Adminer (BD Universal) | http://localhost:8087 | - | - |
-
-### Servidores de Desarrollo
-
-| Servicio | URL | Puerto Debug | Descripción |
-|----------|-----|--------------|-------------|
-| **PHP + Apache** | http://localhost:8085 | 9003 | Servidor PHP con Apache y Xdebug |
-| **Python** | http://localhost:8000 | 5678 | Entorno Python con Flask, Django, FastAPI |
-| **Node.js** | http://localhost:3000 | 9229 | Entorno Node.js con Angular, Vue, React |
-| **Nginx** | http://localhost:8086 | - | Servidor web estático |
-
-### Conexiones Directas a Bases de Datos
-
-**MySQL:**
-```bash
-# Conectar desde terminal
-mysql -h localhost -P 3306 -u devuser -p
-# Contraseña: devpass
-```
-
-**PostgreSQL:**
-```bash
-# Conectar desde terminal
-psql -h localhost -p 5432 -U devuser -d appdb
-# Contraseña: devpass
-```
-
-**MongoDB:**
+Consulta `extrainfo.md` para detalles completos, troubleshooting, comandos avanzados y arquitectura.
 ```bash
 # Conectar desde terminal
 mongo mongodb://localhost:27017

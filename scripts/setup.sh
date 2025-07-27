@@ -139,13 +139,13 @@ install_docker_arch() {
 # Verificar versión mínima de Docker
 check_docker_version() {
   if ! command -v docker >/dev/null; then
-    log "✗ Docker no está disponible después de la instalación"
+    log " Docker no está disponible después de la instalación"
     return 1
   fi
   
   local version=$(docker --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
   if [ -z "$version" ]; then
-    log "✗ No se pudo obtener la versión de Docker"
+    log " No se pudo obtener la versión de Docker"
     return 1
   fi
   
@@ -163,7 +163,7 @@ check_docker_version() {
     local new_version=$(docker --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
     log "Docker actualizado a versión: $new_version"
   else
-    log "✓ Docker versión $version - Compatible."
+    log " Docker versión $version - Compatible."
   fi
 }
 
@@ -176,7 +176,7 @@ if ! command -v docker >/dev/null; then
     *) log "ADVERTENCIA: Distro no soportada para Docker" ;;
   esac
 else
-  log "✓ Docker ya instalado."
+  log " Docker ya instalado."
 fi
 
 # Verificar versión independientemente
@@ -187,33 +187,33 @@ log "[4/9] Habilitando Docker y configurando usuario..."
 
 # Habilitar servicio Docker
 if systemctl is-active --quiet docker; then
-  log "✓ Servicio Docker ya está activo"
+  log " Servicio Docker ya está activo"
 else
   log "Habilitando servicio Docker..."
   retry sudo systemctl enable docker || handle_error "Error habilitando servicio Docker"
   retry sudo systemctl start docker || handle_error "Error iniciando servicio Docker"
   sleep 3
   if systemctl is-active --quiet docker; then
-    log "✓ Servicio Docker iniciado correctamente"
+    log " Servicio Docker iniciado correctamente"
   else
-    log "✗ Servicio Docker no se pudo iniciar"
+    log " Servicio Docker no se pudo iniciar"
   fi
 fi
 
 # Agregar usuario al grupo docker
 if groups $USER | grep -qw docker; then
-  log "✓ Usuario ya en grupo docker"
+  log " Usuario ya en grupo docker"
 else
   log "Agregando usuario al grupo docker..."
   retry sudo usermod -aG docker $USER || handle_error "Error agregando usuario al grupo docker"
-  log "✓ Usuario agregado al grupo docker. Reinicia sesión o ejecuta: newgrp docker"
+  log " Usuario agregado al grupo docker. Reinicia sesión o ejecuta: newgrp docker"
 fi
 
 # Verificar docker-compose
 log "Verificando docker-compose..."
 if command -v docker-compose >/dev/null; then
   compose_version=$(docker-compose --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-  log "✓ docker-compose versión $compose_version ya instalado"
+  log " docker-compose versión $compose_version ya instalado"
 else
   log "docker-compose no encontrado. Instalando..."
   case $DISTRO in
@@ -231,25 +231,25 @@ else
   
   # Verificar instalación
   if command -v docker-compose >/dev/null; then
-    log "✓ docker-compose instalado correctamente"
+    log " docker-compose instalado correctamente"
   else
-    log "✗ docker-compose no se pudo instalar"
+    log " docker-compose no se pudo instalar"
   fi
 fi
 
 # 5. Crear red docker traefik si no existe
 log "[5/9] Creando red Docker 'traefik' si no existe..."
 if docker network ls | grep -qw traefik; then
-  log "✓ Red traefik ya existe"
+  log " Red traefik ya existe"
 else
   log "Creando red traefik..."
   retry docker network create traefik || handle_error "Error creando red Docker"
   
   # Verificar creación
   if docker network ls | grep -qw traefik; then
-    log "✓ Red traefik creada correctamente"
+    log " Red traefik creada correctamente"
   else
-    log "✗ Red traefik no se pudo crear"
+    log " Red traefik no se pudo crear"
   fi
 fi
 
@@ -263,13 +263,13 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
     
     # Verificar instalación
     if command -v ufw >/dev/null; then
-      log "✓ UFW instalado correctamente"
+      log " UFW instalado correctamente"
     else
-      log "✗ UFW no se pudo instalar"
+      log " UFW no se pudo instalar"
     fi
   else
     ufw_version=$(ufw --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
-    log "✓ UFW versión $ufw_version ya instalado"
+    log " UFW versión $ufw_version ya instalado"
   fi
   
   if ! sudo ufw status | grep -q active; then
@@ -284,19 +284,50 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
     
     # Verificar estado
     if sudo ufw status | grep -q "Status: active"; then
-      log "✓ UFW habilitado y configurado correctamente"
+      log " UFW habilitado y configurado correctamente"
     else
-      log "✗ UFW no se pudo activar"
+      log " UFW no se pudo activar"
     fi
   else
-    log "✓ UFW ya estaba habilitado"
+    log " UFW ya estaba habilitado"
   fi
 else
   log "ADVERTENCIA: Configura iptables o nftables manualmente en Arch"
 fi
 
-# 7. Crear estructura de carpetas
-log "[7/9] Creando estructura de carpetas en ~/dev/docker..."
+# 7. Instalar versionadores de Node.js y PHP
+log "[7/9] Instalando nvm (Node.js) y phpenv (PHP)..."
+
+# Instalar nvm (Node.js Version Manager)
+if ! command -v nvm >/dev/null; then
+  log "Instalando nvm..."
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash || handle_error "Error instalando nvm"
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  log " nvm instalado"
+else
+  log " nvm ya está instalado"
+fi
+
+# Instalar phpenv (PHP Version Manager)
+if ! command -v phpenv >/dev/null; then
+  log "Instalando phpenv..."
+  git clone https://github.com/phpenv/phpenv.git ~/.phpenv || handle_error "Error clonando phpenv"
+  export PHPENV_ROOT="$HOME/.phpenv"
+  export PATH="$PHPENV_ROOT/bin:$PATH"
+  if ! grep -q 'phpenv init' ~/.bashrc; then
+    echo 'export PHPENV_ROOT="$HOME/.phpenv"' >> ~/.bashrc
+    echo 'export PATH="$PHPENV_ROOT/bin:$PATH"' >> ~/.bashrc
+    echo 'eval "$(phpenv init -)"' >> ~/.bashrc
+  fi
+  eval "$(phpenv init -)"
+  log " phpenv instalado"
+else
+  log " phpenv ya está instalado"
+fi
+
+# 8. Crear estructura de carpetas
+log "[8/10] Creando estructura de carpetas en ~/dev/docker..."
 DEV_HOME="$HOME/dev"
 # Estructura pequeña pero funcional
 mkdir -p "$DEV_HOME/docker/services"
@@ -323,14 +354,14 @@ echo "# Proyectos de trabajo Python\nprint('Proyectos de trabajo')" > "$DEV_HOME
 # Crear archivo HTML para Nginx
 echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola desde Nginx!</h1><p>Servidor Nginx funcionando correctamente.</p></body></html>" > "$DEV_HOME/docker/nginx-html/index.html"
 
-log "✓ Carpetas y archivos de ejemplo creados."
+log " Carpetas y archivos de ejemplo creados."
 
 # 8. Configurar archivos de entorno
 log "[8/9] Configurando archivos de entorno..."
 
 # Crear .env si no existe
 if [ -f "$DEV_HOME/docker/.env" ]; then
-  log "✓ Archivo .env ya existe"
+  log " Archivo .env ya existe"
 else
   log "Creando archivo .env..."
   cat > "$DEV_HOME/docker/.env" << 'EOF'
@@ -354,14 +385,29 @@ DOCKER_NETWORK=traefik-network
 EOF
   
   if [ -f "$DEV_HOME/docker/.env" ]; then
-    log "✓ Archivo .env creado correctamente"
+    log " Archivo .env creado correctamente"
   else
     handle_error "Error creando archivo .env"
   fi
 fi
 
-# 9. Copiar docker-compose desde docker-files
-log "[9/10] Copiando archivos docker-compose..."
+# 9. Copiar carpeta examples al entorno docker
+log "[9/10] Copiando carpeta examples al entorno docker..."
+EXAMPLES_SRC_DIR="$(dirname \"$0\")/../examples"
+EXAMPLES_DST_DIR="$DEV_HOME/docker/examples"
+if [ -d "$EXAMPLES_SRC_DIR" ]; then
+  if [ ! -d "$EXAMPLES_DST_DIR" ]; then
+    cp -r "$EXAMPLES_SRC_DIR" "$EXAMPLES_DST_DIR"
+    log "✓ Carpeta examples copiada correctamente"
+  else
+    log "✓ Carpeta examples ya existe en el entorno docker"
+  fi
+else
+  log "ADVERTENCIA: No se encontró la carpeta examples en $EXAMPLES_SRC_DIR"
+fi
+
+# 10. Copiar docker-compose desde docker-files
+log "[10/11] Copiando archivos docker-compose..."
 DOCKER_FILES_DIR="$(dirname "$0")/docker-files"
 TRAEFIK_COMPOSE="$DEV_HOME/docker/traefik/docker-compose.yml"
 STACK_COMPOSE="$DEV_HOME/docker/stack/docker-compose.yml"
@@ -370,12 +416,12 @@ STACK_COMPOSE="$DEV_HOME/docker/stack/docker-compose.yml"
 if [ -f "$DOCKER_FILES_DIR/traefik-compose.yml" ]; then
   if [ ! -f "$TRAEFIK_COMPOSE" ]; then
     if cp "$DOCKER_FILES_DIR/traefik-compose.yml" "$TRAEFIK_COMPOSE" 2>/dev/null; then
-      log "✓ Traefik compose copiado correctamente"
+      log " Traefik compose copiado correctamente"
     else
       handle_error "Error copiando Traefik compose"
     fi
   else
-    log "✓ docker-compose Traefik ya existe"
+    log " docker-compose Traefik ya existe"
   fi
 else
   log "ADVERTENCIA: No se encontró traefik-compose.yml en $DOCKER_FILES_DIR/"
@@ -385,12 +431,12 @@ fi
 if [ -f "$DOCKER_FILES_DIR/stack-compose.yml" ]; then
   if [ ! -f "$STACK_COMPOSE" ]; then
     if cp "$DOCKER_FILES_DIR/stack-compose.yml" "$STACK_COMPOSE" 2>/dev/null; then
-      log "✓ Stack compose copiado correctamente"
+      log " Stack compose copiado correctamente"
     else
       handle_error "Error copiando Stack compose"
     fi
   else
-    log "✓ docker-compose stack ya existe"
+    log " docker-compose stack ya existe"
   fi
 else
   log "ADVERTENCIA: No se encontró stack-compose.yml en $DOCKER_FILES_DIR/"
@@ -400,12 +446,12 @@ fi
 if [ -f "$DOCKER_FILES_DIR/nginx.conf" ]; then
   if [ ! -f "$DEV_HOME/docker/stack/nginx.conf" ]; then
     if cp "$DOCKER_FILES_DIR/nginx.conf" "$DEV_HOME/docker/stack/nginx.conf" 2>/dev/null; then
-      log "✓ nginx.conf copiado correctamente"
+      log " nginx.conf copiado correctamente"
     else
       handle_error "Error copiando nginx.conf"
     fi
   else
-    log "✓ nginx.conf ya existe"
+    log " nginx.conf ya existe"
   fi
 else
   log "ADVERTENCIA: No se encontró nginx.conf en $DOCKER_FILES_DIR/"
@@ -415,12 +461,12 @@ fi
 if [ -f "$DOCKER_FILES_DIR/php.ini" ]; then
   if [ ! -f "$DEV_HOME/docker/stack/php.ini" ]; then
     if cp "$DOCKER_FILES_DIR/php.ini" "$DEV_HOME/docker/stack/php.ini" 2>/dev/null; then
-      log "✓ php.ini copiado correctamente"
+      log " php.ini copiado correctamente"
     else
       handle_error "Error copiando php.ini"
     fi
   else
-    log "✓ php.ini ya existe"
+    log " php.ini ya existe"
   fi
 else
   log "ADVERTENCIA: No se encontró php.ini en $DOCKER_FILES_DIR/"
@@ -430,7 +476,7 @@ fi
 log "[10/10] Creando script para levantar stack..."
 UP_SCRIPT="$DEV_HOME/docker/up.sh"
 if [ -f "$UP_SCRIPT" ]; then
-  log "✓ Script up.sh ya existe"
+  log " Script up.sh ya existe"
 else
   log "Creando script up.sh..."
   cat > "$UP_SCRIPT" << 'EOF'
@@ -445,7 +491,7 @@ echo "Stack levantado. Accede a http://localhost:8080 para Traefik dashboard"
 EOF
   
   if chmod +x "$UP_SCRIPT" 2>/dev/null; then
-    log "✓ Script up.sh creado y permisos asignados"
+    log " Script up.sh creado y permisos asignados"
   else
     handle_error "Error creando script up.sh"
   fi
@@ -457,7 +503,7 @@ if [ -f "$SCRIPT_DIR/project-manager.sh" ]; then
   if [ ! -f "$DEV_HOME/docker/project-manager.sh" ]; then
     if cp "$SCRIPT_DIR/project-manager.sh" "$DEV_HOME/docker/project-manager.sh" 2>/dev/null; then
       if chmod +x "$DEV_HOME/docker/project-manager.sh" 2>/dev/null; then
-        log "✓ Gestor de proyectos copiado y configurado como ejecutable"
+        log " Gestor de proyectos copiado y configurado como ejecutable"
       else
         handle_error "Error asignando permisos al gestor de proyectos"
       fi
@@ -465,7 +511,7 @@ if [ -f "$SCRIPT_DIR/project-manager.sh" ]; then
       handle_error "Error copiando gestor de proyectos"
     fi
   else
-    log "✓ Gestor de proyectos ya existe"
+    log " Gestor de proyectos ya existe"
   fi
 else
   log "ADVERTENCIA: No se encontró project-manager.sh en $SCRIPT_DIR/"
@@ -494,38 +540,38 @@ log "Para verificar: docker compose version"
 log ""
 log "=== VERIFICACIONES FINALES ==="
 if command -v docker >/dev/null; then
-  log "✓ Docker instalado: $(docker --version)"
+  log " Docker instalado: $(docker --version)"
 else
-  log "✗ Docker no encontrado"
+  log " Docker no encontrado"
 fi
 
 if command -v docker-compose >/dev/null; then
-  log "✓ Docker Compose instalado: $(docker-compose --version)"
+  log " Docker Compose instalado: $(docker-compose --version)"
 else
-  log "✗ Docker Compose no encontrado"
+  log " Docker Compose no encontrado"
 fi
 
 if systemctl is-active --quiet docker 2>/dev/null; then
-  log "✓ Servicio Docker activo"
+  log " Servicio Docker activo"
 else
-  log "✗ Servicio Docker no activo"
+  log " Servicio Docker no activo"
 fi
 
 if groups $USER | grep -qw docker; then
-  log "✓ Usuario en grupo docker"
+  log " Usuario en grupo docker"
 else
-  log "✗ Usuario no en grupo docker"
+  log " Usuario no en grupo docker"
 fi
 
 if docker network ls 2>/dev/null | grep -q traefik; then
-  log "✓ Red Docker traefik creada"
+  log " Red Docker traefik creada"
 else
-  log "✗ Red Docker traefik no encontrada"
+  log " Red Docker traefik no encontrada"
 fi
 
 if [ $ERROR_COUNT -eq 0 ]; then
   log ""
-  log "✓ INSTALACIÓN EXITOSA - Sin errores detectados"
+  log " INSTALACIÓN EXITOSA - Sin errores detectados"
 else
   log ""
   log "⚠ INSTALACIÓN COMPLETADA CON $ERROR_COUNT ERRORES"
