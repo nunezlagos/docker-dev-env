@@ -525,9 +525,7 @@ docker system prune -a
 - **Mongo Express:** Puerto 8083
 - **Redis Commander:** Puerto 8084
 
-### Development Tips
-
-#### Consejos de Desarrollo
+### Consejos de Desarrollo
 
 #### Debugging de Python
 - Instala `debugpy` en tu proyecto: `pip install debugpy`
@@ -578,41 +576,41 @@ docker system prune -a
 6. Usa la bandera `--reload` para recarga automática en frameworks Python
 7. Usa `nodemon` para recarga automática en desarrollo Node.js
 
-### Troubleshooting
+### Solución de Problemas
 
-**Common Issues:**
+**Problemas Comunes:**
 
-1. **"Port already in use"**
+1. **"Puerto ya en uso"**
    ```bash
-   # Check what's using the port
+   # Revisa qué está usando el puerto
    sudo lsof -i :8080
-   # Kill the process
+   # Termina el proceso
    sudo kill -9 [PID]
    ```
 
-2. **"Cannot connect to Docker"**
+2. **"No se puede conectar a Docker"**
    ```bash
-   # Restart Docker
+   # Reinicia Docker
    sudo systemctl restart docker
-   # Add user to docker group
+   # Agrega el usuario al grupo de docker
    sudo usermod -aG docker $USER
    ```
 
-3. **"Container won't start"**
+3. **"El contenedor no arranca"**
    ```bash
-   # View detailed logs
-   docker-compose logs [service-name]
+   # Ver logs detallados
+   docker-compose logs [nombre-del-servicio]
    ```
 
-**Useful Commands:**
+**Comandos Útiles:**
 ```bash
-# Clean all Docker (CAUTION!)
+# Limpiar todo Docker (¡PRECAUCIÓN!)
 docker system prune -a
 
-# View space usage
+# Ver uso de espacio
 docker system df
 
-# Update images
+# Actualizar imágenes
 docker-compose pull
 ```
 
