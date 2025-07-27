@@ -1,7 +1,7 @@
 # Flujo de Trabajo Diario
 **Autor:** nunezlagos
 
-## 🚀 Inicio de Sesión de Trabajo
+## Inicio de Sesión de Trabajo
 
 Cuando inicies tu sesión de trabajo (después de encender WSL o reiniciar), sigue estos pasos:
 
@@ -35,7 +35,7 @@ docker-compose ps
 docker-compose logs -f
 ```
 
-## 🛠️ Trabajando con Proyectos Específicos
+## Trabajando con Proyectos Específicos
 
 ### Para Proyectos PHP
 ```bash
@@ -70,7 +70,7 @@ npm install
 npm start
 ```
 
-## 📧 Configuración de Email (MailHog)
+## Configuración de Email (MailHog)
 
 Para proyectos que envían emails:
 
@@ -85,7 +85,7 @@ SMTP_PASS=  # vacío
 # http://mail.localhost
 ```
 
-## 🔄 Gestión de Servicios Durante el Trabajo
+## Gestión de Servicios Durante el Trabajo
 
 ### Reiniciar un Servicio Específico
 ```bash
@@ -111,7 +111,7 @@ docker-compose logs -f python
 docker-compose logs -f
 ```
 
-## 🛑 Final de Sesión de Trabajo
+## Final de Sesión de Trabajo
 
 ### Opción 1: Mantener Servicios Corriendo (Recomendado)
 ```bash
@@ -128,7 +128,7 @@ docker-compose down
 docker-compose down -v
 ```
 
-## 🚨 Solución de Problemas Comunes
+## Solución de Problemas Comunes
 
 ### Servicios No Responden
 ```bash
@@ -161,7 +161,7 @@ sudo chown -R $USER:$USER ./projects/
 chmod -R 755 ./projects/
 ```
 
-## 📋 Comandos Útiles de Gestión
+## Comandos Útiles de Gestión
 
 ### Usando el Script de Gestión
 ```bash
@@ -193,7 +193,7 @@ docker image prune
 docker system df
 ```
 
-## 💡 Consejos de Productividad
+## Consejos de Productividad
 
 1. **Mantén los servicios corriendo**: Es más eficiente dejar Docker corriendo entre sesiones
 2. **Usa aliases**: Crea aliases en tu `.bashrc` para comandos frecuentes

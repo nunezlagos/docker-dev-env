@@ -1,39 +1,39 @@
-# Docker Development Environment Architecture
+# Arquitectura del Entorno de Desarrollo Docker
 
-**Author:** nunezlagos  
-**Version:** 2.0  
-**Description:** Professional development environment with Traefik reverse proxy
+**Autor:** nunezlagos  
+**Versión:** 2.0  
+**Descripción:** Entorno de desarrollo profesional con proxy reverso Traefik
 
-## Architecture Overview
+## Descripción General de la Arquitectura
 
-### Core Components
+### Componentes Principales
 
-1. **Traefik Reverse Proxy**
-   - Main entry point for all services
-   - Automatic SSL certificate management
-   - Dynamic service discovery
-   - Dashboard: http://localhost:8080
+1. **Proxy Reverso Traefik**
+   - Punto de entrada principal para todos los servicios
+   - Gestión automática de certificados SSL
+   - Descubrimiento dinámico de servicios
+   - Panel: http://localhost:8080
 
-2. **Development Services**
+2. **Servicios de Desarrollo**
    - PHP 8.2 + Apache: http://php.localhost
    - Python 3.11: http://python.localhost
    - Node.js 18: http://node.localhost
-   - Nginx (optional): http://static.localhost
+   - Nginx (opcional): http://static.localhost
    - MailHog: http://mailhog.localhost
 
-3. **Database Services**
-   - MySQL 8.0 (Port 3306)
-   - PostgreSQL 15 (Port 5432)
-   - MongoDB 6.0 (Port 27017)
-   - Redis 7.0 (Port 6379)
+3. **Servicios de Base de Datos**
+   - MySQL 8.0 (Puerto 3306)
+   - PostgreSQL 15 (Puerto 5432)
+   - MongoDB 6.0 (Puerto 27017)
+   - Redis 7.0 (Puerto 6379)
 
-4. **Administration Tools**
-   - Adminer (Port 8081)
-   - phpMyAdmin (Port 8082)
-   - Mongo Express (Port 8083)
-   - Redis Commander (Port 8084)
+4. **Herramientas de Administración**
+   - Adminer (Puerto 8081)
+   - phpMyAdmin (Puerto 8082)
+   - Mongo Express (Puerto 8083)
+   - Redis Commander (Puerto 8084)
 
-### Network Architecture
+### Arquitectura de Red
 
 ```
 Internet/Localhost
@@ -47,66 +47,66 @@ Internet/Localhost
     │       │       │
     └───────┼───────┘
             │
-    Database Layer
+    Capa de Base de Datos
    (MySQL, PostgreSQL,
     MongoDB, Redis)
 ```
 
-### Service Routing
+### Enrutamiento de Servicios
 
-| Service | URL | Container Port | Debug Port |
-|---------|-----|----------------|------------|
+| Servicio | URL | Puerto Contenedor | Puerto Debug |
+|----------|-----|-------------------|-------------|
 | PHP | http://php.localhost | 80 | 9003 |
 | Python | http://python.localhost | 8000 | 5678 |
 | Node.js | http://node.localhost | 3000 | 9229 |
 | Nginx | http://static.localhost | 80 | - |
 | MailHog | http://mailhog.localhost | 8025 | - |
 
-### Project Organization
+### Organización de Proyectos
 
 ```
 docker-dev-env/
-├── config/               # Docker configuration files
-│   ├── stack-compose.yml  # Main services configuration
-│   ├── traefik-compose.yml # Traefik reverse proxy
-│   └── *.conf, *.ini      # Service configurations
-├── projects/              # Development projects
-│   ├── php/              # PHP projects
-│   ├── python/           # Python projects
-│   ├── nodejs/           # Node.js projects
-│   └── static/           # Static files for Nginx
-├── scripts/              # Management scripts
-│   ├── up.sh            # Start environment
-│   ├── setup.sh         # Initial setup
-│   └── project-manager.sh # Project management
-├── docs/                 # Documentation
-│   └── ARCHITECTURE.md   # Technical documentation
-└── README.md             # Main documentation
+├── config/               # Archivos de configuración Docker
+│   ├── stack-compose.yml  # Configuración de servicios principales
+│   ├── traefik-compose.yml # Proxy reverso Traefik
+│   └── *.conf, *.ini      # Configuraciones de servicios
+├── projects/              # Proyectos de desarrollo
+│   ├── php/              # Proyectos PHP
+│   ├── python/           # Proyectos Python
+│   ├── nodejs/           # Proyectos Node.js
+│   └── static/           # Archivos estáticos para Nginx
+├── scripts/              # Scripts de gestión
+│   ├── up.sh            # Iniciar entorno
+│   ├── setup.sh         # Configuración inicial
+│   └── project-manager.sh # Gestión de proyectos
+├── docs/                 # Documentación
+│   └── ARCHITECTURE.md   # Documentación técnica
+└── README.md             # Documentación principal
 ```
 
-### Key Features
+### Características Principales
 
-- **Automatic SSL:** Traefik handles SSL certificates
-- **Service Discovery:** Dynamic routing based on labels
-- **Development Debugging:** Dedicated ports for each technology
-- **Project Management:** Organized folder structure
-- **Optional Services:** Nginx only starts when needed
-- **Persistent Data:** All data survives container restarts
+- **SSL Automático:** Traefik maneja los certificados SSL
+- **Descubrimiento de Servicios:** Enrutamiento dinámico basado en etiquetas
+- **Debugging de Desarrollo:** Puertos dedicados para cada tecnología
+- **Gestión de Proyectos:** Estructura de carpetas organizada
+- **Servicios Opcionales:** Nginx solo inicia cuando es necesario
+- **Datos Persistentes:** Todos los datos sobreviven a reinicios de contenedores
 
-### Security Considerations
+### Consideraciones de Seguridad
 
-- All services run in isolated Docker network
-- Database access restricted to development environment
-- Debug ports only accessible locally
-- No production credentials in configuration
+- Todos los servicios se ejecutan en red Docker aislada
+- Acceso a base de datos restringido al entorno de desarrollo
+- Puertos de debug solo accesibles localmente
+- Sin credenciales de producción en la configuración
 
-### Performance Optimizations
+### Optimizaciones de Rendimiento
 
-- Traefik caching for static content
-- Persistent volumes for faster container startup
-- Optimized Docker images
-- Minimal resource allocation
+- Cache de Traefik para contenido estático
+- Volúmenes persistentes para inicio más rápido de contenedores
+- Imágenes Docker optimizadas
+- Asignación mínima de recursos
 
 ---
 
-**Note:** This environment is designed for local development only. Do not use in production without proper security hardening.
+**Nota:** Este entorno está diseñado solo para desarrollo local. No usar en producción sin el endurecimiento de seguridad apropiado.

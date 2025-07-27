@@ -1,7 +1,7 @@
-# Docker Development Environment Stack
-# Services: MySQL, PostgreSQL, MongoDB, Redis, PHP, Python, Node.js, Nginx, Adminer
-# Author: nunezlagos
-# Description: Complete development environment with Traefik reverse proxy
+# Stack del Entorno de Desarrollo Docker
+# Servicios: MySQL, PostgreSQL, MongoDB, Redis, PHP, Python, Node.js, Nginx, Adminer
+# Autor: nunezlagos
+# Descripción: Entorno de desarrollo completo con proxy reverso Traefik
 
 version: '3.8'
 services:

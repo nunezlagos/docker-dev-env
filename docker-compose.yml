@@ -1,31 +1,31 @@
-# Docker Development Environment
-# Author: nunezlagos
-# Main compose file that references the organized configuration
+# Entorno de Desarrollo Docker
+# Autor: nunezlagos
+# Archivo compose principal que referencia la configuración organizada
 
 version: '3.8'
 
-# This file serves as a convenient entry point
-# All actual configuration is in config/stack-compose.yml
+# Este archivo sirve como punto de entrada conveniente
+# Toda la configuración real está en config/stack-compose.yml
 
-# To use this environment:
+# Para usar este entorno:
 # docker-compose up -d
 
-# For Traefik (reverse proxy):
+# Para Traefik (proxy reverso):
 # docker-compose -f config/traefik-compose.yml up -d
 
-# For the full stack:
+# Para el stack completo:
 # docker-compose -f config/stack-compose.yml up -d
 
-# Or use the provided scripts:
+# O usar los scripts proporcionados:
 # ./scripts/up.sh
 
 services:
-  # This file includes the main stack configuration
-  # Run: docker-compose -f config/stack-compose.yml up -d
+  # Este archivo incluye la configuración del stack principal
+  # Ejecutar: docker-compose -f config/stack-compose.yml up -d
   
-  # For convenience, you can also run:
+  # Por conveniencia, también puedes ejecutar:
   # docker-compose up -d
-  # This will start the services defined in config/stack-compose.yml
+  # Esto iniciará los servicios definidos en config/stack-compose.yml
   
 include:
   - config/stack-compose.yml

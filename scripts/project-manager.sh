@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# Project Manager for Docker Development Environment
-# Author: nunezlagos
-# Description: Script to create and manage projects across different technologies
-# Version: 2.0
-# Usage: ./project-manager.sh [command] [type] [category] [name]
+# Gestor de Proyectos para Entorno de Desarrollo Docker
+# Autor: nunezlagos
+# Descripción: Script para crear y gestionar proyectos en diferentes tecnologías
+# Versión: 2.0
+# Uso: ./project-manager.sh [comando] [tipo] [categoría] [nombre]
 
 set -e
 
-# Colors for output
+# Colores para salida
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m' # Sin Color
 
 # Función para logging
 log() {
@@ -23,7 +23,7 @@ log() {
 }
 
 warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    echo -e "${YELLOW}[AVISO]${NC} $1"
 }
 
 error() {
@@ -37,38 +37,38 @@ info() {
 # Configuración
 DEV_HOME="$HOME/dev/docker"
 
-# Function to show help
+# Función para mostrar ayuda
 show_help() {
-    echo "Project Manager - Docker Development Environment"
-    echo "Author: nunezlagos"
+    echo "Gestor de Proyectos - Entorno de Desarrollo Docker"
+    echo "Autor: nunezlagos"
     echo ""
-    echo "Usage: ./project-manager.sh [command] [type] [category] [name]"
+    echo "Uso: ./project-manager.sh [comando] [tipo] [categoría] [nombre]"
     echo ""
-    echo "Commands:"
-    echo "  create    - Create a new project"
-    echo "  list      - List existing projects"
-    echo "  remove    - Remove a project"
-    echo "  info      - Show environment information"
-    echo "  start     - Start Docker stack"
-    echo "  stop      - Stop Docker stack"
-    echo "  status    - Show stack status"
-    echo "  logs      - Show stack logs"
-    echo "  help      - Show this help"
+    echo "Comandos:"
+    echo "  create    - Crear un nuevo proyecto"
+    echo "  list      - Listar proyectos existentes"
+    echo "  remove    - Eliminar un proyecto"
+    echo "  info      - Mostrar información del entorno"
+    echo "  start     - Iniciar stack Docker"
+    echo "  stop      - Detener stack Docker"
+    echo "  status    - Mostrar estado del stack"
+    echo "  logs      - Mostrar logs del stack"
+    echo "  help      - Mostrar esta ayuda"
     echo ""
-    echo "Project types:"
-    echo "  php       - PHP Project"
-    echo "  python    - Python Project"
-    echo "  node      - Node.js Project"
-    echo "  angular   - Angular Project"
-    echo "  react     - React Project"
-    echo "  vue       - Vue.js Project"
+    echo "Tipos de proyecto:"
+    echo "  php       - Proyecto PHP"
+    echo "  python    - Proyecto Python"
+    echo "  node      - Proyecto Node.js"
+    echo "  angular   - Proyecto Angular"
+    echo "  react     - Proyecto React"
+    echo "  vue       - Proyecto Vue.js"
     echo ""
-    echo "Categories:"
-    echo "  general   - General/test projects"
-    echo "  personal  - Personal projects"
-    echo "  work      - Work projects"
+    echo "Categorías:"
+    echo "  general   - Proyectos generales/prueba"
+    echo "  personal  - Proyectos personales"
+    echo "  work      - Proyectos de trabajo"
     echo ""
-    echo "Examples:"
+    echo "Ejemplos:"
     echo "  ./project-manager.sh create php personal mi-blog"
     echo "  ./project-manager.sh create angular work dashboard-admin"
     echo "  ./project-manager.sh create python personal api-rest"
@@ -77,34 +77,48 @@ show_help() {
     echo "  ./project-manager.sh info"
 }
 
-# Función para verificar si Docker está corriendo
-check_docker() {
-    if ! docker info >/dev/null 2>&1; then
-        error "Docker no está corriendo. Por favor, inicia Docker primero."
+# Función para verificar estado de Docker
+check_docker_status() {
+    if ! command -v docker &> /dev/null; then
+        error "Docker no está instalado o no está en PATH"
         exit 1
     fi
+    
+    if ! docker info &> /dev/null; then
+        error "Docker no está ejecutándose. Por favor inicia Docker primero."
+        exit 1
+    fi
+    
+    log "Docker está funcionando correctamente"
 }
 
 # Función para crear proyecto PHP
 create_php_project() {
-    local category=$1
-    local name=$2
-    local project_path="$DEV_HOME/php-$category/$name"
+    local category="$1"
+    local name="$2"
+    local project_path="$DEV_HOME/$category/php/$name"
     
-    mkdir -p "$project_path"
+    log "Creando proyecto PHP: $name en categoría: $category"
     
-    cat > "$project_path/index.php" << EOF
+    # Crear estructura de directorios
+    mkdir -p "$project_path/public"
+    mkdir -p "$project_path/src"
+    mkdir -p "$project_path/config"
+    
+    # Crear index.php
+    cat > "$project_path/public/index.php" << 'EOF'
 <?php
-// Proyecto: $name
-// Categoría: $category
-// Creado: $(date)
+// Proyecto PHP: $name
+// Creado con Entorno de Desarrollo Docker
 
-echo "<h1>Proyecto PHP: $name</h1>";
-echo "<p>Categoría: $category</p>";
-echo "<p>Debugging habilitado en puerto 9003</p>";
-echo "<p>Acceso: http://localhost:8085/$category/$name</p>";
+// Configuración básica
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Tu código aquí...
+// Incluir autoloader si usas Composer
+// require_once __DIR__ . '/../vendor/autoload.php';
+
 ?>
 EOF
 
@@ -114,30 +128,34 @@ EOF
 
 # Función para crear proyecto Python
 create_python_project() {
-    local category=$1
-    local name=$2
-    local project_path="$DEV_HOME/python-$category/$name"
+    local category="$1"
+    local name="$2"
+    local project_path="$DEV_HOME/$category/python/$name"
     
+    log "Creando proyecto Python: $name en categoría: $category"
+    
+    # Crear estructura de directorios
     mkdir -p "$project_path"
     
-    cat > "$project_path/main.py" << EOF
-# Project: $name
-# Category: $category
-# Created: $(date)
-# Author: nunezlagos
+    # Crear main.py
+    cat > "$project_path/main.py" << 'EOF'
+# Proyecto Python: $name
+# Creado con Entorno de Desarrollo Docker
+# Autor: nunezlagos
 
-print(f"Python Project: $name")
-print(f"Category: $category")
-print(f"Debugging available on port 5678")
-print(f"For Flask: flask run --host=0.0.0.0 --port=8000")
-print(f"For FastAPI: uvicorn main:app --host 0.0.0.0 --port 8000 --reload")
+print(f"Proyecto Python: $name")
+print(f"Categoría: $category")
+print(f"Debugging disponible en puerto 5678")
+print(f"Para Flask: flask run --host=0.0.0.0 --port=8000")
+print(f"Para FastAPI: uvicorn main:app --host 0.0.0.0 --port=8000 --reload")
 
 # Tu código aquí...
 if __name__ == "__main__":
     print("¡Hola desde Python!")
 EOF
 
-    cat > "$project_path/requirements.txt" << EOF
+    # Crear requirements.txt
+    cat > "$project_path/requirements.txt" << 'EOF'
 # Dependencias del proyecto $name
 flask
 fastapi
@@ -152,13 +170,17 @@ EOF
 
 # Función para crear proyecto Node.js
 create_node_project() {
-    local category=$1
-    local name=$2
-    local project_path="$DEV_HOME/node-$category/$name"
+    local category="$1"
+    local name="$2"
+    local project_path="$DEV_HOME/$category/node/$name"
     
+    log "Creando proyecto Node.js: $name en categoría: $category"
+    
+    # Crear estructura de directorios
     mkdir -p "$project_path"
     
-    cat > "$project_path/package.json" << EOF
+    # Crear package.json
+    cat > "$project_path/package.json" << 'EOF'
 {
   "name": "$name",
   "version": "1.0.0",
@@ -177,29 +199,29 @@ create_node_project() {
 }
 EOF
 
-    cat > "$project_path/app.js" << EOF
-// Project: $name
-// Category: $category
-// Created: $(date)
-// Author: nunezlagos
+    # Crear app.js
+    cat > "$project_path/app.js" << 'EOF'
+// Proyecto Node.js: $name
+// Creado con Entorno de Desarrollo Docker
+// Autor: nunezlagos
 
 const express = require('express');
 const app = express();
 const PORT = 3000;
 
 app.get('/', (req, res) => {
-    res.send(\`
-        <h1>Node.js Project: $name</h1>
-        <p>Category: $category</p>
-        <p>Author: nunezlagos</p>
-        <p>Debugging available on port 9229</p>
-        <p>Access: http://localhost:3000</p>
-    \`);
+    res.send(`
+        <h1>Proyecto Node.js: $name</h1>
+        <p>Categoría: $category</p>
+        <p>Autor: nunezlagos</p>
+        <p>Debugging disponible en puerto 9229</p>
+        <p>Acceso: http://localhost:3000</p>
+    `);
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(\`Server running on http://localhost:\${PORT}\`);
-    console.log(\`Debugging enabled on port 9229\`);
+    console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+    console.log(`Debugging habilitado en puerto 9229`);
 });
 EOF
 
@@ -212,8 +234,8 @@ EOF
 
 # Función para crear proyecto Angular
 create_angular_project() {
-    local category=$1
-    local name=$2
+    local category="$1"
+    local name="$2"
     
     log "Creando proyecto Angular '$name' en categoría '$category'..."
     info "Esto puede tomar unos minutos..."
@@ -224,39 +246,39 @@ create_angular_project() {
     info "Acceso: http://localhost:3000 (una vez completado)"
 }
 
-# Function to list projects
+# Función para listar proyectos
 list_projects() {
-    local type=$1
+    local type="$1"
     
-    echo "$type Projects:"
+    echo "Proyectos $type:"
     echo ""
     
     for category in general personal work; do
-        local path="$DEV_HOME/$type-$category"
+        local path="$DEV_HOME/$category/$type"
         if [ -d "$path" ]; then
             echo "$category:"
             if [ "$(ls -A $path 2>/dev/null)" ]; then
                 ls -la "$path" | grep "^d" | awk '{print "  - " $9}' | grep -v "^  - \.$" | grep -v "^  - \.\.$"
             else
-                echo "  (empty)"
+                echo "  (vacío)"
             fi
             echo ""
         fi
     done
 }
 
-# Function to show environment information
+# Función para mostrar información del entorno
 show_info() {
-    echo "Development Environment Information"
-    echo "Author: nunezlagos"
+    echo "Información del Entorno de Desarrollo"
+    echo "Autor: nunezlagos"
     echo ""
-    echo "Container Status:"
+    echo "Estado de Contenedores:"
     docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(NAMES|stack_|traefik)"
     echo ""
-    echo "Folder Structure:"
+    echo "Estructura de Carpetas:"
     tree "$DEV_HOME" -L 2 2>/dev/null || find "$DEV_HOME" -maxdepth 2 -type d
     echo ""
-    echo "Access URLs:"
+    echo "URLs de Acceso:"
     echo "  - PHP: http://localhost:8085"
     echo "  - Python: http://localhost:8000"
     echo "  - Node.js: http://localhost:3000"
@@ -264,7 +286,7 @@ show_info() {
     echo "  - MailHog: http://localhost:8025"
     echo "  - Traefik: http://localhost:8080"
     echo ""
-    echo "Debugging Ports:"
+    echo "Puertos de Debugging:"
     echo "  - PHP (Xdebug): 9003"
     echo "  - Python (debugpy): 5678"
     echo "  - Node.js (Inspector): 9229"
@@ -274,7 +296,7 @@ show_info() {
 main() {
     case "$1" in
         "create")
-            check_docker
+            check_docker_status
             case "$2" in
                 "php")
                     create_php_project "$3" "$4"

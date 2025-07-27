@@ -1,96 +1,96 @@
 #!/bin/bash
 
-# Docker Development Environment Startup Script
-# Author: nunezlagos
-# Description: Starts all development environment services
+# Script de Inicio del Entorno de Desarrollo Docker
+# Autor: nunezlagos
+# Descripción: Inicia todos los servicios del entorno de desarrollo
 
 set -e
 
-echo "Starting Docker development environment..."
+echo "Iniciando entorno de desarrollo Docker..."
 echo ""
 
 # Verificar que Docker esté corriendo
 if ! docker info >/dev/null 2>&1; then
-    echo "Error: Docker is not running"
-    echo "Start Docker with: sudo systemctl start docker"
+    echo "Error: Docker no está corriendo"
+    echo "Iniciar Docker con: sudo systemctl start docker"
     exit 1
 fi
 
 # Verificar que estemos en el grupo docker
 if ! groups $USER | grep -qw docker; then
-    echo "Warning: You are not in the docker group"
-    echo "Run: newgrp docker"
+    echo "Advertencia: No estás en el grupo docker"
+    echo "Ejecutar: newgrp docker"
 fi
 
 # Ir al directorio de desarrollo
 DEV_HOME="$HOME/dev/docker"
 if [ ! -d "$DEV_HOME" ]; then
-    echo "Error: Directory $DEV_HOME does not exist"
-    echo "Run first: ./setup.sh"
+    echo "Error: El directorio $DEV_HOME no existe"
+    echo "Ejecutar primero: ./setup.sh"
     exit 1
 fi
 
 cd "$DEV_HOME"
 
-echo "Working in: $DEV_HOME"
+echo "Trabajando en: $DEV_HOME"
 echo ""
 
 # Verificar que existan los archivos docker-compose
 if [ ! -f "traefik/docker-compose.yml" ]; then
-    echo "Error: traefik/docker-compose.yml not found"
+    echo "Error: traefik/docker-compose.yml no encontrado"
     exit 1
 fi
 
 if [ ! -f "stack/docker-compose.yml" ]; then
-    echo "Error: stack/docker-compose.yml not found"
+    echo "Error: stack/docker-compose.yml no encontrado"
     exit 1
 fi
 
 # Verificar que la red traefik exista
 if ! docker network ls | grep -qw traefik; then
-    echo "Creating traefik network..."
+    echo "Creando red traefik..."
     docker network create traefik
 fi
 
-echo "Starting Traefik reverse proxy..."
+echo "Iniciando proxy reverso Traefik..."
 docker-compose -f config/traefik-compose.yml up -d
 
-echo "Starting development services..."
+echo "Iniciando servicios de desarrollo..."
 docker-compose -f config/stack-compose.yml up -d
 echo ""
 
-echo "Waiting for services to be ready..."
+echo "Esperando que los servicios estén listos..."
 sleep 5
 
-echo "Container status:"
+echo "Estado de contenedores:"
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 echo ""
 
-echo "Development environment ready!"
+echo "Entorno de desarrollo listo!"
 echo ""
-echo "Available services:"
-echo "   - Traefik Dashboard: http://localhost:8080"
-echo "   - PHP Development: http://php.localhost (Debug: 9003)"
-echo "   - Python Development: http://python.localhost (Debug: 5678)"
-echo "   - Node.js Development: http://node.localhost (Debug: 9229)"
-echo "   - Static Files (Nginx): http://static.localhost (optional)"
-echo "   - Mail handler: http://mail.localhost"
+echo "Servicios disponibles:"
+echo "   - Panel Traefik: http://localhost:8080"
+echo "   - Desarrollo PHP: http://php.localhost (Debug: 9003)"
+echo "   - Desarrollo Python: http://python.localhost (Debug: 5678)"
+echo "   - Desarrollo Node.js: http://node.localhost (Debug: 9229)"
+echo "   - Archivos Estáticos (Nginx): http://static.localhost (opcional)"
+echo "   - Gestor de correo: http://mail.localhost"
 echo "   - Adminer: http://localhost:8081"
 echo "   - phpMyAdmin: http://localhost:8082"
 echo "   - Mongo Express: http://localhost:8083"
 echo "   - Redis Commander: http://localhost:8084"
 echo ""
-echo "Project folders:"
+echo "Carpetas de proyectos:"
 echo "   PHP General: ~/dev/docker/php-projects/"
 echo "   PHP Personal: ~/dev/docker/php-personal/"
-echo "   PHP Work: ~/dev/docker/php-work/"
+echo "   PHP Trabajo: ~/dev/docker/php-work/"
 echo "   Node.js General: ~/dev/docker/node-projects/"
 echo "   Node.js Personal: ~/dev/docker/node-personal/"
-echo "   Node.js Work: ~/dev/docker/node-work/"
+echo "   Node.js Trabajo: ~/dev/docker/node-work/"
 echo "   Python General: ~/dev/docker/python-projects/"
 echo "   Python Personal: ~/dev/docker/python-personal/"
-echo "   Python Work: ~/dev/docker/python-work/"
+echo "   Python Trabajo: ~/dev/docker/python-work/"
 echo "   Nginx: ~/dev/docker/nginx-html/"
 echo ""
-echo "To stop: docker-compose -f stack/docker-compose.yml down && docker-compose -f traefik/docker-compose.yml down"
-echo "To view logs: docker-compose -f stack/docker-compose.yml logs"
+echo "Para detener: docker-compose -f stack/docker-compose.yml down && docker-compose -f traefik/docker-compose.yml down"
+echo "Para ver logs: docker-compose -f stack/docker-compose.yml logs"

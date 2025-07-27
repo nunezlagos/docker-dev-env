@@ -1,7 +1,7 @@
 #!/bin/bash
-# setup-dev.sh - Complete development environment with dependency validation
-# Compatible with Ubuntu, Debian and Arch
-# Author: nunezlagos
+# setup-dev.sh - Entorno de desarrollo completo con validación de dependencias
+# Compatible con Ubuntu, Debian y Arch
+# Autor: nunezlagos
 set -euo pipefail
 
 # Variables globales
@@ -47,68 +47,68 @@ log "Autor: nunezlagos"
 log "Iniciando setup..."
 log "Log guardado en: $LOG_FILE"
 
-# 1. Detect Distribution
-log "[1/9] Detecting distribution..."
+# 1. Detectar Distribución
+log "[1/9] Detectando distribución..."
 if [ -f /etc/os-release ]; then
   . /etc/os-release
   DISTRO=$ID
-  log "Distribution detected: $DISTRO"
+  log "Distribución detectada: $DISTRO"
 else
-  log "ERROR: Could not detect distribution."
-  log "Attempting manual detection..."
+  log "ERROR: No se pudo detectar la distribución."
+  log "Intentando detección manual..."
   if command -v apt >/dev/null 2>&1; then
     DISTRO="ubuntu"
-    log "Detected Debian/Ubuntu based system"
+    log "Sistema basado en Debian/Ubuntu detectado"
   elif command -v pacman >/dev/null 2>&1; then
     DISTRO="arch"
-    log "Detected Arch Linux system"
+    log "Sistema Arch Linux detectado"
   else
-    log "WARNING: Unsupported system, assuming Ubuntu"
+    log "ADVERTENCIA: Sistema no soportado, asumiendo Ubuntu"
     DISTRO="ubuntu"
   fi
 fi
 
-# 2. Install base dependencies
-log "[2/9] Checking base dependencies (curl, git)..."
+# 2. Instalar dependencias base
+log "[2/9] Verificando dependencias base (curl, git)..."
 
 install_packages_debian() {
-  log "Updating repositories..."
-  retry sudo apt update || handle_error "apt update failed"
-  log "Installing base packages..."
-  retry sudo apt install -y curl git ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Base packages installation failed"
+  log "Actualizando repositorios..."
+  retry sudo apt update || handle_error "falló apt update"
+  log "Instalando paquetes base..."
+  retry sudo apt install -y curl git ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Falló la instalación de paquetes base"
 }
 
 install_packages_arch() {
-  log "Updating Arch repositories..."
-  retry sudo pacman -Sy --noconfirm || handle_error "pacman sync failed"
-  log "Installing base packages..."
-  retry sudo pacman -S --noconfirm curl git || handle_error "Base packages installation failed"
+  log "Actualizando repositorios de Arch..."
+  retry sudo pacman -Sy --noconfirm || handle_error "falló sincronización de pacman"
+  log "Instalando paquetes base..."
+  retry sudo pacman -S --noconfirm curl git || handle_error "Falló la instalación de paquetes base"
 }
 
-# Check and install dependencies
+# Verificar e instalar dependencias
 missing_deps=()
 ! command -v curl >/dev/null && missing_deps+=("curl")
 ! command -v git >/dev/null && missing_deps+=("git")
 
 if [ ${#missing_deps[@]} -gt 0 ]; then
-  log "Missing dependencies: ${missing_deps[*]}"
-  log "Installing base dependencies..."
+  log "Dependencias faltantes: ${missing_deps[*]}"
+  log "Instalando dependencias base..."
   case $DISTRO in
     ubuntu|debian) install_packages_debian ;;
     arch) install_packages_arch ;;
-    *) log "WARNING: Distribution not supported for automatic installation" ;;
+    *) log "ADVERTENCIA: Distribución no soportada para instalación automática" ;;
   esac
   
-  # Verify installation
+  # Verificar instalación
   for dep in "${missing_deps[@]}"; do
     if command -v "$dep" >/dev/null; then
-      log "$dep installed successfully"
+      log "$dep instalado exitosamente"
     else
-      log "$dep could not be installed"
+      log "$dep no se pudo instalar"
     fi
   done
 else
-  log "Base dependencies already installed."
+  log "Dependencias base ya instaladas."
 fi
 
 # 3. Instalar Docker
@@ -279,6 +279,7 @@ if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
     retry sudo ufw allow ssh || handle_error "Error permitiendo SSH"
     retry sudo ufw allow 80 || handle_error "Error permitiendo puerto 80"
     retry sudo ufw allow 443 || handle_error "Error permitiendo puerto 443"
+    retry sudo ufw allow 8080/tcp || handle_error "Error permitiendo puerto 8080"
     retry sudo ufw --force enable || handle_error "Error habilitando UFW"
     
     # Verificar estado
@@ -309,12 +310,12 @@ echo "<?php echo '<h1>Proyectos Personales PHP</h1>'; ?>" > "$DEV_HOME/docker/ph
 echo "<?php echo '<h1>Proyectos de Trabajo PHP</h1>'; ?>" > "$DEV_HOME/docker/php-work/index.php"
 
 # Crear archivos de ejemplo para Node.js
-echo "console.log('Node.js container ready!'); console.log('Debugging disponible en puerto 9229'); console.log('Frameworks: Angular, Vue, React instalados');" > "$DEV_HOME/docker/node-projects/README.txt"
+echo "console.log('Contenedor Node.js listo!'); console.log('Debugging disponible en puerto 9229'); console.log('Frameworks: Angular, Vue, React instalados');" > "$DEV_HOME/docker/node-projects/README.txt"
 echo "console.log('Proyectos personales Node.js');" > "$DEV_HOME/docker/node-personal/README.txt"
 echo "console.log('Proyectos de trabajo Node.js');" > "$DEV_HOME/docker/node-work/README.txt"
 
 # Crear archivos de ejemplo para Python
-echo "# Python Development Environment\nprint('¡Hola desde Python!')\nprint('Flask, Django, FastAPI instalados')\nprint('Debugging disponible en puerto 5678')" > "$DEV_HOME/docker/python-projects/main.py"
+echo "# Entorno de Desarrollo Python\nprint('¡Hola desde Python!')\nprint('Flask, Django, FastAPI instalados')\nprint('Debugging disponible en puerto 5678')" > "$DEV_HOME/docker/python-projects/main.py"
 echo "# Proyectos personales Python\nprint('Proyectos personales')" > "$DEV_HOME/docker/python-personal/main.py"
 echo "# Proyectos de trabajo Python\nprint('Proyectos de trabajo')" > "$DEV_HOME/docker/python-work/main.py"
 
