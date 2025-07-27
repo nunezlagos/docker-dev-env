@@ -25,15 +25,31 @@ if ! groups $USER | grep -qw docker; then
     echo "Ejecutar: newgrp docker"
 fi
 
+# Función para encontrar un puerto disponible
+find_available_port() {
+    local start_port=$1
+    local port=$start_port
+    
+    while ss -tuln | grep -q ":$port\b" 2>/dev/null || netstat -an 2>/dev/null | grep -q ":$port "; do
+        port=$((port + 1))
+        if [ $port -gt $((start_port + 100)) ]; then
+            echo "Error: No se pudo encontrar un puerto disponible cerca de $start_port"
+            exit 1
+        fi
+    done
+    
+    echo $port
+}
+
 # Función para verificar si un puerto está en uso
 check_port() {
     PORT=$1
     # Usamos ss (más moderno que netstat) para verificar si el puerto está en la lista de puertos en escucha
-    if ss -tuln | grep -q ":$PORT\b"; then
-        echo "Error: El puerto $PORT ya está en uso."
-        echo "Por favor, detenga el servicio que usa este puerto o cambie la configuración en config/stack-compose.yml."
-        exit 1
+    if ss -tuln | grep -q ":$PORT\b" 2>/dev/null || netstat -an 2>/dev/null | grep -q ":$PORT "; then
+        echo "Advertencia: El puerto $PORT está en uso, buscando puerto alternativo..."
+        return 1
     fi
+    return 0
 }
 
 # Ir al directorio de desarrollo
@@ -89,25 +105,98 @@ if ! docker network ls | grep -qw traefik; then
     docker network create traefik
 fi
 
-# Verificar puertos antes de iniciar
+# Verificar y asignar puertos dinámicos
 echo "Verificando puertos requeridos..."
-check_port 8080 # Traefik UI
-check_port 8081 # phpMyAdmin
-check_port 8082 # pgAdmin
-check_port 8083 # Mongo Express
-check_port 8084 # Redis Commander
-check_port 8085 # PHP
-check_port 8000 # Python
-check_port 3000 # Node.js
-check_port 1025 # Mailhog SMTP
-check_port 8025 # Mailhog Web
-check_port 8087 # Adminer
+
+# Puertos base deseados
+TRAEFIK_PORT=8080
+PHPMYADMIN_PORT=8081
+PGADMIN_PORT=8082
+MONGO_EXPRESS_PORT=8083
+REDIS_COMMANDER_PORT=8084
+PHP_PORT=8085
+PYTHON_PORT=8000
+NODEJS_PORT=3000
+MAILHOG_SMTP_PORT=1025
+MAILHOG_WEB_PORT=8025
+ADMINER_PORT=8087
+
+# Verificar y encontrar puertos disponibles
+if ! check_port $TRAEFIK_PORT; then
+    TRAEFIK_PORT=$(find_available_port $TRAEFIK_PORT)
+    echo "Usando puerto alternativo para Traefik: $TRAEFIK_PORT"
+fi
+
+if ! check_port $PHPMYADMIN_PORT; then
+    PHPMYADMIN_PORT=$(find_available_port $PHPMYADMIN_PORT)
+    echo "Usando puerto alternativo para phpMyAdmin: $PHPMYADMIN_PORT"
+fi
+
+if ! check_port $PGADMIN_PORT; then
+    PGADMIN_PORT=$(find_available_port $PGADMIN_PORT)
+    echo "Usando puerto alternativo para pgAdmin: $PGADMIN_PORT"
+fi
+
+if ! check_port $MONGO_EXPRESS_PORT; then
+    MONGO_EXPRESS_PORT=$(find_available_port $MONGO_EXPRESS_PORT)
+    echo "Usando puerto alternativo para Mongo Express: $MONGO_EXPRESS_PORT"
+fi
+
+if ! check_port $REDIS_COMMANDER_PORT; then
+    REDIS_COMMANDER_PORT=$(find_available_port $REDIS_COMMANDER_PORT)
+    echo "Usando puerto alternativo para Redis Commander: $REDIS_COMMANDER_PORT"
+fi
+
+if ! check_port $PHP_PORT; then
+    PHP_PORT=$(find_available_port $PHP_PORT)
+    echo "Usando puerto alternativo para PHP: $PHP_PORT"
+fi
+
+if ! check_port $PYTHON_PORT; then
+    PYTHON_PORT=$(find_available_port $PYTHON_PORT)
+    echo "Usando puerto alternativo para Python: $PYTHON_PORT"
+fi
+
+if ! check_port $NODEJS_PORT; then
+    NODEJS_PORT=$(find_available_port $NODEJS_PORT)
+    echo "Usando puerto alternativo para Node.js: $NODEJS_PORT"
+fi
+
+if ! check_port $MAILHOG_SMTP_PORT; then
+    MAILHOG_SMTP_PORT=$(find_available_port $MAILHOG_SMTP_PORT)
+    echo "Usando puerto alternativo para Mailhog SMTP: $MAILHOG_SMTP_PORT"
+fi
+
+if ! check_port $MAILHOG_WEB_PORT; then
+    MAILHOG_WEB_PORT=$(find_available_port $MAILHOG_WEB_PORT)
+    echo "Usando puerto alternativo para Mailhog Web: $MAILHOG_WEB_PORT"
+fi
+
+if ! check_port $ADMINER_PORT; then
+    ADMINER_PORT=$(find_available_port $ADMINER_PORT)
+    echo "Usando puerto alternativo para Adminer: $ADMINER_PORT"
+fi
+
+# Crear archivo temporal con variables de entorno para docker-compose
+cat > "$DEV_HOME/.env" << EOF
+TRAEFIK_PORT=$TRAEFIK_PORT
+PHPMYADMIN_PORT=$PHPMYADMIN_PORT
+PGADMIN_PORT=$PGADMIN_PORT
+MONGO_EXPRESS_PORT=$MONGO_EXPRESS_PORT
+REDIS_COMMANDER_PORT=$REDIS_COMMANDER_PORT
+PHP_PORT=$PHP_PORT
+PYTHON_PORT=$PYTHON_PORT
+NODEJS_PORT=$NODEJS_PORT
+MAILHOG_SMTP_PORT=$MAILHOG_SMTP_PORT
+MAILHOG_WEB_PORT=$MAILHOG_WEB_PORT
+ADMINER_PORT=$ADMINER_PORT
+EOF
 
 echo "Iniciando proxy reverso Traefik..."
-docker-compose -f "$DEV_HOME/config/traefik-compose.yml" up -d --remove-orphans
+TRAEFIK_PORT=$TRAEFIK_PORT docker-compose -f "$DEV_HOME/config/traefik-compose.yml" up -d --remove-orphans
 
 echo "Iniciando servicios de desarrollo..."
-docker-compose -f "$DEV_HOME/config/stack-compose.yml" up -d --remove-orphans
+docker-compose -f "$DEV_HOME/config/stack-compose.yml" --env-file "$DEV_HOME/.env" up -d --remove-orphans
 echo ""
 
 echo "Esperando que los servicios estén listos..."
@@ -120,17 +209,17 @@ echo ""
 echo "Entorno de desarrollo listo!"
 echo ""
 echo "Servicios disponibles:"
-echo "   - Panel Traefik: http://localhost:8080 (Nota: Puede tardar unos minutos en cargar)"
+echo "   - Panel Traefik: http://localhost:$TRAEFIK_PORT (Nota: Puede tardar unos minutos en cargar)"
 echo "   - Desarrollo PHP: http://php.localhost (Debug: 9003) - Requiere configurar hosts"
 echo "   - Desarrollo Python: http://python.localhost (Debug: 5678) - Requiere configurar hosts"
 echo "   - Desarrollo Node.js: http://node.localhost (Debug: 9229) - Requiere configurar hosts"
 
 echo "   - Gestor de correo: http://mail.localhost - Requiere configurar hosts"
-echo "   - phpMyAdmin: http://localhost:8081"
-echo "   - pgAdmin: http://localhost:8082"
-echo "   - Mongo Express: http://localhost:8083 (Usuario: admin, Contraseña: pass)"
-echo "   - Redis Commander: http://localhost:8084"
-echo "   - Adminer: http://localhost:8087"
+echo "   - phpMyAdmin: http://localhost:$PHPMYADMIN_PORT"
+echo "   - pgAdmin: http://localhost:$PGADMIN_PORT"
+echo "   - Mongo Express: http://localhost:$MONGO_EXPRESS_PORT (Usuario: admin, Contraseña: pass)"
+echo "   - Redis Commander: http://localhost:$REDIS_COMMANDER_PORT"
+echo "   - Adminer: http://localhost:$ADMINER_PORT"
 echo ""
 echo "Carpetas de proyectos:"
 echo "   Proyectos: ~/dev/docker/projects/"
