@@ -8,6 +8,7 @@ set -euo pipefail
 LOG_FILE="/tmp/setup-dev.log"
 ERROR_COUNT=0
 MAX_RETRIES=3
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Función de logging
 log() {
@@ -340,13 +341,6 @@ echo "<!DOCTYPE html><html><head><title>Nginx</title></head><body><h1>¡Hola des
 
 log " Carpetas y archivos de ejemplo creados."
 
-# Copiar up.sh y project-manager.sh a la carpeta principal de desarrollo Docker
-cp "$SCRIPT_DIR/up.sh" "$DEV_HOME/docker/up.sh"
-cp "$SCRIPT_DIR/project-manager.sh" "$DEV_HOME/docker/project-manager.sh"
-
-# Cambiar a la carpeta principal de desarrollo Docker
-cd "$DEV_HOME/docker"
-
 # 8. Configurar archivos de entorno
 log "[8/9] Configurando archivos de entorno..."
 
@@ -382,9 +376,16 @@ EOF
   fi
 fi
 
-# 9. Copiar carpeta examples al entorno docker
-log "[9/10] Copiando carpeta examples al entorno docker..."
-EXAMPLES_SRC_DIR="$(dirname \"$0\")/../examples"
+# 9. Copiar archivos de configuración y scripts
+log "[9/10] Copiando archivos de configuración y scripts..."
+
+# Copiar scripts a la carpeta de desarrollo
+cp "$SCRIPT_DIR/up.sh" "$DEV_HOME/docker/up.sh"
+cp "$SCRIPT_DIR/project-manager.sh" "$DEV_HOME/docker/project-manager.sh"
+log "✓ Scripts copiados correctamente"
+
+# Copiar carpeta examples al entorno docker
+EXAMPLES_SRC_DIR="$SCRIPT_DIR/../examples"
 EXAMPLES_DST_DIR="$DEV_HOME/docker/examples"
 if [ -d "$EXAMPLES_SRC_DIR" ]; then
   if [ ! -d "$EXAMPLES_DST_DIR" ]; then
@@ -396,6 +397,9 @@ if [ -d "$EXAMPLES_SRC_DIR" ]; then
 else
   log "ADVERTENCIA: No se encontró la carpeta examples en $EXAMPLES_SRC_DIR"
 fi
+
+# Cambiar a la carpeta principal de desarrollo Docker
+cd "$DEV_HOME/docker"
 
 # 10. Copiar docker-compose desde docker-files
 log "[10/11] Copiando archivos docker-compose..."
