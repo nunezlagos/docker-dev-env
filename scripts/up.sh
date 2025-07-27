@@ -28,8 +28,8 @@ fi
 # Función para verificar si un puerto está en uso
 check_port() {
     PORT=$1
-    # Usamos netstat y grep para verificar si el puerto está en la lista de puertos en escucha
-    if netstat -tuln | grep -q ":$PORT\b"; then
+    # Usamos ss (más moderno que netstat) para verificar si el puerto está en la lista de puertos en escucha
+    if ss -tuln | grep -q ":$PORT\b"; then
         echo "Error: El puerto $PORT ya está en uso."
         echo "Por favor, detenga el servicio que usa este puerto o cambie la configuración en config/stack-compose.yml."
         exit 1
@@ -49,42 +49,26 @@ cd "$DEV_HOME"
 echo "Trabajando en: $DEV_HOME"
 echo ""
 
-# --- NUEVO: Apagar contenedores previos y backup automático ---
-FUTURE_PREFIX="stack_"
-BACKUP_DIR="$DEV_HOME/backups"
-BACKUP_FILE="$BACKUP_DIR/backup_$(date +%Y%m%d).zip"
+# --- NUEVO: Limpiar contenedores y volúmenes huérfanos ---
+echo "Limpiando contenedores y volúmenes huérfanos..."
 
-mkdir -p "$BACKUP_DIR"
-
-# Listar contenedores que coincidan con el prefijo
-EXISTING_CONTAINERS=$(docker ps -a --format '{{.Names}}' | grep "^$FUTURE_PREFIX" || true)
-if [ -n "$EXISTING_CONTAINERS" ]; then
-    echo "Se encontraron contenedores previos con el prefijo '$FUTURE_PREFIX'."
-    echo "Deteniendo y eliminando contenedores previos..."
-    docker stop $EXISTING_CONTAINERS
-    docker rm $EXISTING_CONTAINERS
-    echo "Contenedores detenidos y eliminados."
-    # Verificar si hay datos persistentes
-    echo "Verificando posibles volúmenes y datos asociados..."
-    # Listar volúmenes asociados a los servicios
-    VOLUMENES=$(docker volume ls --format '{{.Name}}' | grep "$FUTURE_PREFIX" || true)
-    if [ -n "$VOLUMENES" ]; then
-        echo "ADVERTENCIA: Se detectaron volúmenes asociados que podrían contener datos de bases de datos u otros servicios."
-        echo "Se recomienda realizar un backup antes de continuar."
-    fi
-    # Backup automático si no existe
-    if [ ! -f "$BACKUP_FILE" ]; then
-        echo "Realizando backup de datos persistentes en $BACKUP_FILE ..."
-        if command -v zip >/dev/null; then
-            zip -r "$BACKUP_FILE" "$DEV_HOME/services" "$DEV_HOME/projects" "$DEV_HOME/html" 2>/dev/null
-            echo "Backup creado en $BACKUP_FILE."
-        else
-            echo "ERROR: zip no está instalado. Instale zip para backups automáticos."
-        fi
-    else
-        echo "Ya existe un backup para hoy en $BACKUP_FILE."
-    fi
+# Detener todos los contenedores relacionados con config
+CONFIG_CONTAINERS=$(docker ps -a --format '{{.Names}}' | grep "^config_" || true)
+if [ -n "$CONFIG_CONTAINERS" ]; then
+    echo "Deteniendo contenedores config existentes..."
+    docker stop $CONFIG_CONTAINERS 2>/dev/null || true
+    docker rm $CONFIG_CONTAINERS 2>/dev/null || true
 fi
+
+# Limpiar volúmenes huérfanos
+echo "Limpiando volúmenes huérfanos..."
+docker volume prune -f 2>/dev/null || true
+
+# Limpiar redes huérfanas
+echo "Limpiando redes huérfanas..."
+docker network prune -f 2>/dev/null || true
+
+echo "Limpieza completada."
 # --- FIN NUEVO ---
 
 
@@ -120,10 +104,10 @@ check_port 8025 # Mailhog Web
 check_port 8087 # Adminer
 
 echo "Iniciando proxy reverso Traefik..."
-docker-compose -f "$DEV_HOME/config/traefik-compose.yml" up -d
+docker-compose -f "$DEV_HOME/config/traefik-compose.yml" up -d --remove-orphans
 
 echo "Iniciando servicios de desarrollo..."
-docker-compose -f "$DEV_HOME/config/stack-compose.yml" up -d
+docker-compose -f "$DEV_HOME/config/stack-compose.yml" up -d --remove-orphans
 echo ""
 
 echo "Esperando que los servicios estén listos..."

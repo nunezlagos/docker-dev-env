@@ -76,14 +76,14 @@ install_packages_debian() {
   log "Actualizando repositorios..."
   retry sudo apt update || handle_error "falló apt update"
   log "Instalando paquetes base..."
-  retry sudo apt install -y curl git zip unzip ca-certificates lsb-release gnupg2 software-properties-common || handle_error "Falló la instalación de paquetes base"
+  retry sudo apt install -y curl git zip unzip ca-certificates lsb-release gnupg2 software-properties-common iproute2 || handle_error "Falló la instalación de paquetes base"
 }
 
 install_packages_arch() {
   log "Actualizando repositorios de Arch..."
   retry sudo pacman -Sy --noconfirm || handle_error "falló sincronización de pacman"
   log "Instalando paquetes base..."
-  retry sudo pacman -S --noconfirm curl git zip unzip || handle_error "Falló la instalación de paquetes base"
+  retry sudo pacman -S --noconfirm curl git zip unzip iproute2 || handle_error "Falló la instalación de paquetes base"
 }
 
 # Verificar e instalar dependencias
@@ -92,6 +92,7 @@ missing_deps=()
 ! command -v git >/dev/null && missing_deps+=("git")
 ! command -v zip >/dev/null && missing_deps+=("zip")
 ! command -v unzip >/dev/null && missing_deps+=("unzip")
+! command -v ss >/dev/null && missing_deps+=("iproute2")
 
 if [ ${#missing_deps[@]} -gt 0 ]; then
   log "Dependencias faltantes: ${missing_deps[*]}"
