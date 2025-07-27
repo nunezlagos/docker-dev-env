@@ -24,11 +24,11 @@ echo "Distro detectada: $DISTRO"
 echo "[2/9] Verificando dependencias base (curl, git)..."
 install_packages_debian() {
   sudo apt update
-  sudo apt install -y curl git ufw ca-certificates lsb-release
+  sudo apt install -y curl git ca-certificates lsb-release
 }
 install_packages_arch() {
   sudo pacman -Sy --noconfirm
-  sudo pacman -S --noconfirm curl git ufw
+  sudo pacman -S --noconfirm curl git
 }
 if ! command -v curl >/dev/null || ! command -v git >/dev/null; then
   echo "Instalando dependencias base..."
@@ -85,6 +85,12 @@ fi
 # 6. Configurar firewall (solo Ubuntu/Debian)
 echo "[6/9] Configurando firewall UFW si aplica..."
 if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
+  if ! command -v ufw >/dev/null; then
+    echo "UFW no está instalado. Instalando..."
+    sudo apt update
+    sudo apt install -y ufw
+  fi
+  
   if ! sudo ufw status | grep -q active; then
     sudo ufw default deny incoming
     sudo ufw default allow outgoing
